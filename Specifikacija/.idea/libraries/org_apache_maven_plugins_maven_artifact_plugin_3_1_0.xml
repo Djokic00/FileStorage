@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="org.apache.maven.plugins:maven-artifact-plugin:3.1.0" type="repository">
+    <properties maven-id="org.apache.maven.plugins:maven-artifact-plugin:3.1.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/maven-artifact-plugin-3.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-utils-3.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/maven-shared-utils-3.3.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-io-2.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-codec-1.15.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
