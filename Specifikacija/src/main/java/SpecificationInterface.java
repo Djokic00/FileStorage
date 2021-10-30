@@ -7,7 +7,7 @@ public interface SpecificationInterface {
     ////ls komanda u specifikaciji
     void createListOfFiles();
 
-    void moveFile(String filename);
+    void moveFile(String filename, String directory);
 
     void saveFile(String filename);
     void deleteFile(String filename);
@@ -17,10 +17,15 @@ public interface SpecificationInterface {
     void sort(String directory, String option, String ... name);
     void filter(String directory, String extension);
 
-    void downloadFile();
+    void downloadFile(String path);
 
     void logIn();
     void logOut();
+
+
+
+
+
 
 
 }
