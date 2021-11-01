@@ -11,7 +11,7 @@ public interface SpecificationInterface {
     void moveFile(String filename, String directory);
 
     void saveFile(String filename);
-    void deleteFile(String filename);
+    void deleteFile(String filename, String path);
     void deleteDirectory(String directory);
 
     void listFilesFromDirectory(String directory);
