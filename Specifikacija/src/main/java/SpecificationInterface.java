@@ -1,30 +1,30 @@
 public interface SpecificationInterface {
 
-    void createFile(String filename, String directory);
-    void createDirectory(String name,String storage);
-    void createStorage(String path, Long storageSize);
+    void createFile(String filename, String path);
+    void createDirectory(String name, String path);
+    void createStorage(String name, String path, Long storageSize, String ... restriction);
     void createListOfDirectories();
     ////ls komanda u specifikaciji
     void createListOfFiles();
-    void createUser(String username, String password, Integer level);
+    void createUser(String username, String password, Integer level, String path);
 
-    void moveFile(String filename, String directory);
+    void moveFile(String filename, String path, String currentPath);
 
-    void saveFile(String filename);
+    void saveFile(String filename, String path);
     void deleteFile(String filename, String path);
-    void deleteDirectory(String directory);
+    void deleteDirectory(String directory, String path);
 
-    void listFilesFromDirectory(String directory);
-    void sort(String directory, String option, String ... name);
-    void filter(String directory, String extension);
+    void listFilesFromDirectory(String path);
+    void sort(String path, String option, String ... name);
+    //acs-desc; ime,datum....
+    void filter(String path, String extension);
+    //.txt .json
 
     void downloadFile(String filename);
 
     void logIn(String username, String password);
     void logOut();
-
-    void storageRestriction(String restriction, String ... rest);
-    void directoryNumberOfFiles(Integer numberOfFiles);
+    void directoryNumberOfFiles(Integer numberOfFiles, String path);
 
 
 
