@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,12 +8,12 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 public class LocalImplementation extends SpecificationClass implements SpecificationInterface {
     HashMap<String, Long> mapOfStorageSizes = new HashMap<>();
-    String os=File.separator;
+    HashMap<String, Integer> mapOfDirRestrictions = new HashMap<>();
+    String os = File.separator;
 
 
     static {
@@ -21,20 +22,45 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createFile(String filename, String path) {
-        File newFile = new File(path + filename);
+        File newFile = new File(path +os+ filename);
+
         try {
-            newFile.createNewFile();
+            Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
+            if (numberOfFilesLeft > 0) {
+                newFile.createNewFile();
+                numberOfFilesLeft--;
+                mapOfDirRestrictions.put(path,numberOfFilesLeft);
+            } else System.out.println("Nema mesta");
             System.out.println(newFile.length());
-            //System.out.println(Files.size(Path.of(path)));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void createDirectory(String directoryName, String path) {
-        File newDir = new File(path + directoryName);
-        newDir.mkdir();
+    public void createDirectory(String directoryName, String path, Integer... restriction) {
+        //Integer numberOfFilesLeft = 0;
+        if (restriction.length > 0) {
+           mapOfDirRestrictions.put(path + os + directoryName, restriction[0]);
+        }
+        File newDir = new File(path +os+ directoryName);
+        //try {
+            if (mapOfDirRestrictions.get(path) != null) {
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
+                if (numberOfFilesLeft > 0) {
+                    newDir.mkdir();
+                    numberOfFilesLeft--;
+                    mapOfDirRestrictions.put(path,numberOfFilesLeft);
+                } else System.out.println("Nema mesta");
+            }
+        //} catch (Exception e) {
+          //  System.out.println("Mozemo da napravimo folder");
+            else newDir.mkdir();
+        //}
+
+
+
     }
 
     @Override
@@ -45,12 +71,18 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void createListOfDirectories() {
-
+    public void createListOfDirectories(String directoryName, Integer numberOfDirectories, String path, Integer... restriction) {
+        for (int i = 0; i < numberOfDirectories; i++){
+            createDirectory(directoryName + i, path,restriction[0]);
+        }
     }
 
     @Override
-    public void createListOfFiles() {
+    public void createListOfFiles(String filename, Integer numberOfFiles, String path) {
+        for (int i = 0; i < numberOfFiles; i++){
+            createFile(filename + i, path+os);
+        }
+
 
     }
 
@@ -70,7 +102,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void saveFile(String filename, String path) {
+    public void downloadFile(String filename, String path) {
         //moveFile(filename, System.getProperty("user.home")+os, path+os);
         try {
             Path newDir=Paths.get(System.getProperty("user.home"));
@@ -85,25 +117,26 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void deleteFile(String filename, String path) {
-        File file = new File(path + "/" + filename);
+        File file = new File(path + os + filename);
         file.delete();
-    }
-
-    @Override
-    public void deleteDirectory(String s, String s1) {
-
+        Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
+        mapOfDirRestrictions.put(path, ++numberOfFilesLeft);
     }
 
 
     @Override
-    public void listFilesFromDirectory(String path) {
+    public void listFilesFromDirectory(String path, String... extension) {
         File file = new File(path);
-        File[] list=file.listFiles();
+        File[] list = file.listFiles();
         if (list != null) {
             for (File f : list) {
-
-                System.out.println(f.getName());
-                // System.out.println(f.length());
+                if (extension.length == 0) System.out.println(f.getName());
+                else {
+                    for (String extensionName : extension) {
+                        if (f.getName().endsWith(extensionName))
+                            System.out.println(f.getName());
+                    }
+                }
 
                 BasicFileAttributes attrs = null;
                 try {
@@ -128,17 +161,24 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void sort(String s, String s1, String... strings) {
+    public void sort(String path, String option, String... name) {
+        File file = new File(path);
+        File[] list = file.listFiles();
+       // if (option.equals("asc"))
+         //   Arrays.sort(list);
+        if (option.equals("desc"))
+            Arrays.sort(list,Collections.reverseOrder());
+        for (File files:list){
+            System.out.println(files.getName());
+        }
+
 
     }
 
-    @Override
-    public void filter(String s, String s1) {
 
-    }
 
     @Override
-    public void downloadFile(String s) {
+    public void editFile(String s) {
 
     }
 
@@ -152,9 +192,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     }
 
-    @Override
-    public void directoryNumberOfFiles(Integer integer, String s) {
 
-    }
 
 }
