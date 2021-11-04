@@ -1,33 +1,24 @@
 public interface SpecificationInterface {
 
-    void createFile(String filename, String path);
-    void createDirectory(String name, String path,Integer... restriction);
-    void createStorage(String name, String path, Long storageSize, String ... restriction);
+    void createFile(String filename, String path); // touch
+    void createDirectory(String name, String path,Integer... restriction); // mkdir
+    void createStorage(String name, String path, Long storageSize, String ... restriction); // ns
+    // mkdir name number, mkdir -res name number number
     void createListOfDirectories(String filename, Integer numberOfDirectories, String path,Integer... restriction);
-    ////ls komanda u specifikaciji
-    void createListOfFiles(String filename, Integer numberOfFiles, String path);
+    void createListOfFiles(String filename, Integer numberOfFiles, String path); // touch name number
     void createUser(String username, String password, Integer level, String path);
 
-    void moveFile(String filename, String path, String currentPath);
+    void moveFile(String filename, String path, String currentPath); // move
+    void editFile(String filename); //
+    void downloadFile(String filename, String path); // download
+    void deleteFile(String filename, String path); // rm
 
-    void downloadFile(String filename, String path);
-    void deleteFile(String filename, String path);
-
-
-    void listFilesFromDirectory(String path, String... extension);
-    void sort(String path, String option, String ... name);
+    void listFilesFromDirectory(String path, String... extension); // ls
+    void sort(String path, String option, String ... name); // sort
     //acs-desc; ime,datum....
-
-
-    void editFile(String filename);
 
     void logIn(String username, String password);
     void logOut();
-
-
-
-
-
 
 
 }

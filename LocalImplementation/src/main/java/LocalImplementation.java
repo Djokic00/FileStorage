@@ -58,9 +58,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
           //  System.out.println("Mozemo da napravimo folder");
             else newDir.mkdir();
         //}
-
-
-
     }
 
     @Override
@@ -103,7 +100,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void downloadFile(String filename, String path) {
-        //moveFile(filename, System.getProperty("user.home")+os, path+os);
         try {
             Path newDir=Paths.get(System.getProperty("user.home"));
             Files.copy(Paths.get(path+os+filename), newDir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
@@ -145,16 +141,13 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     String pattern = "yyyy-MM-dd HH:mm:ss";
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
-                    String formatted = simpleDateFormat.format( new Date( time.toMillis() ) );
+                    String formatted = simpleDateFormat.format(new Date(time.toMillis()));
 
                     // System.out.println(  f.getName()+" je kreiran " + formatted );
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
                 //System.out.println(f); printuje celu putanju
-
             }
         }
 
@@ -164,18 +157,12 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public void sort(String path, String option, String... name) {
         File file = new File(path);
         File[] list = file.listFiles();
-       // if (option.equals("asc"))
-         //   Arrays.sort(list);
         if (option.equals("desc"))
             Arrays.sort(list,Collections.reverseOrder());
         for (File files:list){
             System.out.println(files.getName());
         }
-
-
     }
-
-
 
     @Override
     public void editFile(String s) {
@@ -191,7 +178,5 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public void logOut() {
 
     }
-
-
 
 }
