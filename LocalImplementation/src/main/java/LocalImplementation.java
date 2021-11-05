@@ -1,4 +1,7 @@
+import com.google.gson.JsonObject;
+
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +16,8 @@ import java.util.*;
 public class LocalImplementation extends SpecificationClass implements SpecificationInterface {
     HashMap<String, Long> mapOfStorageSizes = new HashMap<>();
     HashMap<String, Integer> mapOfDirRestrictions = new HashMap<>();
-    String os = File.separator;
+    JsonObject jsonObject = new JsonObject();
+    String osSeparator = File.separator;
 
 
     static {
@@ -21,71 +25,120 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void createFile(String filename, String path) {
-        File newFile = new File(path +os+ filename);
+    public void createFile(String filename, String path){
+        File newFile = new File(path + osSeparator + filename);
+        /*
+            Restrikcije za skladiste => filename.endsWith("restrikcija") (npr .exe) onda
+            ispisujemo ne mozete dodati fajl u skladiste zbog exe ekstenzije. U suprotnom nastavljamo
+            sa kodom tj funkcijom
+            A posle moramo da proverimo kad napravimo falj da li moze da se skladisti zbog velicine
+        */
 
-        try {
+        if (mapOfDirRestrictions.containsKey(path) == true) {
             Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
             if (numberOfFilesLeft > 0) {
-                newFile.createNewFile();
-                numberOfFilesLeft--;
-                mapOfDirRestrictions.put(path,numberOfFilesLeft);
-            } else System.out.println("Nema mesta");
-            System.out.println(newFile.length());
-
-        } catch (IOException e) {
-            e.printStackTrace();
+                try {
+                    newFile.createNewFile();
+                    numberOfFilesLeft--;
+                    mapOfDirRestrictions.put(path, numberOfFilesLeft);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else System.out.println("Folder is full!");
         }
+        else {
+            try {
+                newFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //System.out.println(newFile.length());
     }
 
     @Override
     public void createDirectory(String directoryName, String path, Integer... restriction) {
-        //Integer numberOfFilesLeft = 0;
         if (restriction.length > 0) {
-           mapOfDirRestrictions.put(path + os + directoryName, restriction[0]);
+           mapOfDirRestrictions.put(path + osSeparator + directoryName, restriction[0]);
         }
-        File newDir = new File(path +os+ directoryName);
-        //try {
-            if (mapOfDirRestrictions.get(path) != null) {
-                Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
-                if (numberOfFilesLeft > 0) {
-                    newDir.mkdir();
-                    numberOfFilesLeft--;
-                    mapOfDirRestrictions.put(path,numberOfFilesLeft);
-                } else System.out.println("Nema mesta");
-            }
-        //} catch (Exception e) {
-          //  System.out.println("Mozemo da napravimo folder");
-            else newDir.mkdir();
-        //}
+        File newDir = new File(path + osSeparator + directoryName);
+
+        if (mapOfDirRestrictions.containsKey(path) == true) {
+            Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
+            if (numberOfFilesLeft > 0) {
+                newDir.mkdir();
+                mapOfDirRestrictions.put(path, --numberOfFilesLeft);
+            } else System.out.println("Nema mesta");
+        }
+        else {
+            newDir.mkdir();
+            System.out.println("Ulazi ovde");
+        }
     }
 
     @Override
     public void createStorage(String name, String path, Long storageSize, String... restrictions) {
         mapOfStorageSizes.put(path,storageSize);
-        File newDir = new File(path + name);
-        newDir.mkdir();
+        File storage = new File(path + name);
+        storage.mkdir();
+        String rootDirPath = path + name + osSeparator + "rootDirectory";
+        File rootDirectory = new File(rootDirPath);
+        rootDirectory.mkdir();
+//        File users = new File(rootDirectory + osSeparator + "users.json");
+//        File config = new File(rootDirectory + osSeparator + "config.json");
+//        try {
+//            users.createNewFile();
+//            config.createNewFile();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        //Inserting key-value pairs into the json object
+        jsonObject.addProperty("ID", "1");
+        jsonObject.addProperty("First_Name", "Shikhar");
+        try {
+            FileWriter file = new FileWriter(rootDirPath + osSeparator + "users.json");
+            file.write(jsonObject.toString());
+            file.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     @Override
-    public void createListOfDirectories(String directoryName, Integer numberOfDirectories, String path, Integer... restriction) {
-        for (int i = 0; i < numberOfDirectories; i++){
-            createDirectory(directoryName + i, path,restriction[0]);
+    public void createListOfDirectories(String dirName, Integer numberOfDirectories, String path) {
+        for (int i = 0; i < numberOfDirectories; i++) {
+            createDirectory(dirName + i, path);
+        }
+        if (numberOfDirectories == 0) createDirectory(dirName + '0', path);
+    }
+
+    public void createListOfDirRestriction(String dirName, Integer restriction, Integer numberOfDirectories, String path) {
+        for (int i = 0; i < numberOfDirectories; i++) {
+            createDirectory(dirName + i, path, restriction);
         }
     }
 
     @Override
     public void createListOfFiles(String filename, Integer numberOfFiles, String path) {
-        for (int i = 0; i < numberOfFiles; i++){
-            createFile(filename + i, path+os);
+        for (int i = 0; i < numberOfFiles; i++) {
+            createFile(filename + i, path + osSeparator);
         }
-
-
     }
 
     @Override
-    public void createUser(String s, String s1, Integer integer, String s2) {
-
+    public void createUser(String username, String password, Integer level, String path) {
+//        try {
+////            //FileWriter file = new FileWriter( + osSeparator + "users.json");
+////            file.write(jsonObject.toString());
+////            file.close();
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -102,7 +155,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public void downloadFile(String filename, String path) {
         try {
             Path newDir=Paths.get(System.getProperty("user.home"));
-            Files.copy(Paths.get(path+os+filename), newDir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Paths.get(path + osSeparator + filename), newDir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
             System.out.println("Kopirao sam: "+filename);
 
         } catch (IOException e) {
@@ -113,12 +166,26 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void deleteFile(String filename, String path) {
-        File file = new File(path + os + filename);
+        File file = new File(path + osSeparator + filename);
+        if (file.isDirectory()) {
+            deleteDirectory(file);
+        }
         file.delete();
-        Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
-        mapOfDirRestrictions.put(path, ++numberOfFilesLeft);
+
+        if (mapOfDirRestrictions.containsKey(path) == true) {
+            Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
+            mapOfDirRestrictions.put(path, ++numberOfFilesLeft);
+        }
     }
 
+    public void deleteDirectory(File file) {
+        for (File subfile : file.listFiles()) {
+            if (subfile.isDirectory()) {
+                deleteDirectory(subfile);
+            }
+            subfile.delete();
+        }
+    }
 
     @Override
     public void listFilesFromDirectory(String path, String... extension) {
@@ -157,7 +224,10 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public void sort(String path, String option, String... name) {
         File file = new File(path);
         File[] list = file.listFiles();
-        if (option.equals("desc"))
+        if (option.equals("asc")) {
+            Arrays.sort(list);
+        }
+        else if (option.equals("desc"))
             Arrays.sort(list,Collections.reverseOrder());
         for (File files:list){
             System.out.println(files.getName());
@@ -170,8 +240,12 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void logIn(String s, String s1) {
-
+    public void logIn(String username, String password, String path) {
+        if (jsonObject.isJsonNull() == true) {
+            createUser(username, password, 1, path);
+        }
+        // ako je prazan json onda create user
+        // else trazimo iz json-a da li je dobro
     }
 
     @Override

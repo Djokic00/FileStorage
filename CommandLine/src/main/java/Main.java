@@ -2,6 +2,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLOutput;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,11 @@ public class Main {
 
 
         if (Files.exists(pathToStorage) == false) {
+//            System.out.println("Username:");
+//            String username=input.nextLine();
+//            System.out.println("Password:");
+//            String password=input.nextLine();
+//            local.logIn(username,password);
             System.out.println("Ako zelite da napravite novo skladiste ukucajte ns i putanju do skladista");
         } else currentPath = commandLine;
 
@@ -36,9 +42,14 @@ public class Main {
                 String ime = input.nextLine();
                 System.out.println("Unesite velicinu skladista");
                 Long storageSize = Long.parseLong(input.nextLine());
+
                 local.createStorage(ime, currentPath, storageSize);
                 currentPath+=ime;
+                System.out.println("Username:");
+                String username=input.nextLine();
+
             }
+
 
             else if (parameters[0].equals("cd")) {
                 currentPath += osSeparator;
@@ -57,24 +68,29 @@ public class Main {
             }
 
             else if (parameters[0].equals("mkdir")) {
-                if (parameters[1].equals("-res")) {
+                if (parameters.length == 1) {
+                    System.out.println("You must enter a name for the folder");
+                }
+                else if (parameters[1].equals("-res")) {
                     if (parameters.length == 4) {
-                        local.createListOfDirectories(parameters[2], Integer.parseInt(parameters[3]), currentPath);
-                    } else if (parameters.length == 5) {
-                        local.createListOfDirectories(parameters[2], Integer.parseInt(parameters[3]), currentPath, Integer.parseInt(parameters[4]));
-                    } else {
-                        local.createDirectory(parameters[2], currentPath,Integer.parseInt(parameters[3]));
-                        System.out.println(currentPath);
+                        local.createDirectory(parameters[2], currentPath, Integer.parseInt(parameters[3]));
                     }
-                } else {
+                    else if (parameters.length == 5) {
+                        local.createListOfDirRestriction(parameters[2], Integer.parseInt(parameters[3]),
+                        Integer.parseInt(parameters[4]), currentPath);
+                    }
+                    else if (parameters.length <= 3)
+                        System.out.println("Too few arguments. Try 'mkdir --help' for more information");
+                }
+                else {
                     if (parameters.length == 3) {
                         local.createListOfDirectories(parameters[1], Integer.parseInt(parameters[2]), currentPath);
-                    } else {
-                        //Class local = Class.forName("LocalImplementation");// = new LocalImplementation();
-                        System.out.println(parameters[1]);
+                    } else if (parameters.length == 2) {
+                        //Class local = Class.forName("LocalImplementation");
                         local.createDirectory(parameters[1], currentPath);
                         System.out.println(currentPath);
-                    }
+                    } else if (parameters.length > 3)
+                        System.out.println("Too many arguments.Try 'mkdir --help' for more information");
                 }
             }
             else if (parameters[0].equals("rm")) {
@@ -133,6 +149,10 @@ public class Main {
 
             else if (parameters[0].equals("exit")) {
                 System.exit(0);
+            }
+
+            else {
+                System.out.println(parameters[0] + " command not found");
             }
         }
     }
