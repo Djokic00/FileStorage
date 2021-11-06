@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -7,21 +8,20 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Main {
-    //static LocalImplementation local = new LocalImplementation();
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    // /home/aleksa/Desktop/aa
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
 
         String currentPath = "";
-        String osSeparator = "";
+        String osSeparator;
 
         Scanner input = new Scanner(System.in);
         System.out.println("Unesite putanju do skladista: ");
         String commandLine = input.nextLine();
 
-
         Path pathToStorage = Paths.get(commandLine);
         osSeparator = File.separator;
-
 
         if (Files.exists(pathToStorage) == false) {
 //            System.out.println("Username:");
@@ -33,7 +33,7 @@ public class Main {
         } else currentPath = commandLine;
 
         Class localClass = Class.forName("LocalImplementation");
-        SpecificationClass local= SpecificationManager.getExporter(currentPath);
+        SpecificationClass local = SpecificationManager.getExporter(currentPath);
 
         while (true) {
             commandLine = input.nextLine();
@@ -48,10 +48,12 @@ public class Main {
                 Long storageSize = Long.parseLong(input.nextLine());
 
                 local.createStorage(ime, currentPath, storageSize);
-                currentPath+=ime;
+                currentPath += ime;
                 System.out.println("Username:");
-                String username=input.nextLine();
-
+                String username = input.nextLine();
+                System.out.println("Password");
+                String password = input.nextLine();
+                local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
             }
 
 
@@ -91,7 +93,6 @@ public class Main {
                     if (parameters.length == 3) {
                         local.createListOfDirectories(parameters[1], Integer.parseInt(parameters[2]), currentPath);
                     } else if (parameters.length == 2) {
-                        //Class local = Class.forName("LocalImplementation");
                         local.createDirectory(parameters[1], currentPath);
                         System.out.println(currentPath);
                     } else if (parameters.length > 3)

@@ -1,4 +1,6 @@
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import model.User;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,7 +27,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void createFile(String filename, String path){
+    public void createFile(String filename, String path) {
         File newFile = new File(path + osSeparator + filename);
         /*
             Restrikcije za skladiste => filename.endsWith("restrikcija") (npr .exe) onda
@@ -80,32 +82,32 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public void createStorage(String name, String path, Long storageSize, String... restrictions) {
         mapOfStorageSizes.put(path,storageSize);
+        System.out.println(path+name);
         File storage = new File(path + name);
         storage.mkdir();
         String rootDirPath = path + name + osSeparator + "rootDirectory";
         File rootDirectory = new File(rootDirPath);
         rootDirectory.mkdir();
-//        File users = new File(rootDirectory + osSeparator + "users.json");
-//        File config = new File(rootDirectory + osSeparator + "config.json");
-//        try {
-//            users.createNewFile();
-//            config.createNewFile();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        //Inserting key-value pairs into the json object
-        jsonObject.addProperty("ID", "1");
-        jsonObject.addProperty("First_Name", "Shikhar");
+        File users = new File(rootDirectory + osSeparator + "users.json");
+        File config = new File(rootDirectory + osSeparator + "config.json");
         try {
-            FileWriter file = new FileWriter(rootDirPath + osSeparator + "users.json");
-            file.write(jsonObject.toString());
-            file.close();
+            users.createNewFile();
+            config.createNewFile();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
+        //Inserting key-value pairs into the json object
+//        jsonObject.addProperty("ID", "1");
+//        jsonObject.addProperty("First_Name", "Shikhar");
+//        try {
+//            FileWriter file = new FileWriter(rootDirPath + osSeparator + "users.json");
+//            file.write(jsonObject.toString());
+//            file.close();
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -131,14 +133,19 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createUser(String username, String password, Integer level, String path) {
-//        try {
-////            //FileWriter file = new FileWriter( + osSeparator + "users.json");
-////            file.write(jsonObject.toString());
-////            file.close();
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
+        try {
+            FileWriter file = new FileWriter(path + osSeparator + "users.json");
+            jsonObject.addProperty(username,password);
+            System.out.println(path + osSeparator + "users.json");
+           // Gson gson = new Gson();
+            //User user = new User(username, password, level);
+            //jsonObject.addProperty(gson.toJson(username, password), level);
+            file.write(jsonObject.toString());
+            file.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -241,7 +248,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void logIn(String username, String password, String path) {
-        if (jsonObject.isJsonNull() == true) {
+        if (jsonObject.size() == 0) {
             createUser(username, password, 1, path);
         }
         // ako je prazan json onda create user

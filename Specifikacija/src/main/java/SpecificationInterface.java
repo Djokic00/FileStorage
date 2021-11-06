@@ -2,7 +2,7 @@ import java.io.IOException;
 
 public interface SpecificationInterface {
 
-    void createFile(String filename, String path); // touch
+    void createFile(String filename, String path) throws IOException; // touch
     void createDirectory(String name, String path,Integer... restriction); // mkdir
     void createStorage(String name, String path, Long storageSize, String ... restriction); // ns
     // mkdir name numberOfDir, mkdir -res name restriction numberOfDir

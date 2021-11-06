@@ -1,12 +1,12 @@
 public abstract class SpecificationManager extends SpecificationClass {
-    private static SpecificationClass dbExporter;
+    private static SpecificationClass exporter;
 
-    public static void registerExporter(SpecificationClass dbExp) {
-        dbExporter = dbExp;
+    public static void registerExporter(SpecificationClass exp) {
+        exporter = exp;
     }
 
     public static SpecificationClass getExporter(String fileName) {
-        dbExporter.setFileName(fileName);
-        return dbExporter;
+        exporter.setFileName(fileName);
+        return exporter;
     }
 }
