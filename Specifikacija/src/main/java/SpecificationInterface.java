@@ -7,6 +7,7 @@ public interface SpecificationInterface {
     void createStorage(String name, String path, Long storageSize, String ... restriction); // ns
     // mkdir name numberOfDir, mkdir -res name restriction numberOfDir
     void createListOfDirectories(String filename, Integer numberOfDirectories, String path);
+    void createListOfDirRestriction(String dirName, Integer restriction, Integer numberOfDirectories, String path);
     void createListOfFiles(String filename, Integer numberOfFiles, String path); // touch name number
     void createUser(String username, String password, Integer level, String path);
 

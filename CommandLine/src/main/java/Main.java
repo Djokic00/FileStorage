@@ -7,9 +7,10 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Main {
-    static LocalImplementation local = new LocalImplementation();
+    //static LocalImplementation local = new LocalImplementation();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
+
         String currentPath = "";
         String osSeparator = "";
 
@@ -30,6 +31,9 @@ public class Main {
 //            local.logIn(username,password);
             System.out.println("Ako zelite da napravite novo skladiste ukucajte ns i putanju do skladista");
         } else currentPath = commandLine;
+
+        Class localClass = Class.forName("LocalImplementation");
+        SpecificationClass local= SpecificationManager.getExporter(currentPath);
 
         while (true) {
             commandLine = input.nextLine();
@@ -61,7 +65,8 @@ public class Main {
                 if (parameters.length == 3)
                     local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]), currentPath);
                 else {
-                    //Class local = Class.forName("LocalImplementation");// = new LocalImplementation();
+
+                    // = new LocalImplementation();
                     local.createFile(parameters[1], currentPath);
                     System.out.println(currentPath);
                 }
