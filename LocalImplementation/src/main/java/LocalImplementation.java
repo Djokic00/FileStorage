@@ -1,17 +1,16 @@
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import model.User;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -19,6 +18,9 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     HashMap<String, Long> mapOfStorageSizes = new HashMap<>();
     HashMap<String, Integer> mapOfDirRestrictions = new HashMap<>();
     JsonObject jsonObject = new JsonObject();
+    JsonObject user = new JsonObject();
+    File users;
+    File config;
     String osSeparator = File.separator;
 
 
@@ -88,8 +90,8 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         String rootDirPath = path + name + osSeparator + "rootDirectory";
         File rootDirectory = new File(rootDirPath);
         rootDirectory.mkdir();
-        File users = new File(rootDirectory + osSeparator + "users.json");
-        File config = new File(rootDirectory + osSeparator + "config.json");
+        users = new File(rootDirectory + osSeparator + "users.json");
+        config = new File(rootDirectory + osSeparator + "config.json");
         try {
             users.createNewFile();
             config.createNewFile();
@@ -109,6 +111,8 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 //            e.printStackTrace();
 //        }
     }
+
+
 
     @Override
     public void createListOfDirectories(String dirName, Integer numberOfDirectories, String path) {
@@ -134,19 +138,42 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public void createUser(String username, String password, Integer level, String path) {
         try {
-            FileWriter file = new FileWriter(path + osSeparator + "users.json");
-            jsonObject.addProperty(username,password);
-            System.out.println(path + osSeparator + "users.json");
-           // Gson gson = new Gson();
-            //User user = new User(username, password, level);
-            //jsonObject.addProperty(gson.toJson(username, password), level);
-            file.write(jsonObject.toString());
+
+
+//            user.addProperty("username", username);
+//            user.addProperty("password", password);
+//            user.addProperty("level", String.valueOf(level));
+//
+//            JsonArray userList = new JsonArray();
+//            userList.add(user);
+
+            FileWriter file = new FileWriter(path + osSeparator + "users.json", true);
+
+            //jsonObject.addProperty("user", String.valueOf(user));
+            //JsonArray jsonArray=new JsonArray();
+            //jsonArray.add(jsonObject);
+            //file.write(jsonArray.toString());
+           // System.out.println(path + osSeparator + "users.json");
+           // file.write(userList.toString());
+           // file.write(String.valueOf(jsonObject));
+            //file.close();
+
+
+            Gson gson = new Gson();
+            User user = new User(username, password, level);
+            String a = gson.toJson(user);
+            System.out.println(a);
+            file.write(a);
             file.close();
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
     }
+
+
 
     @Override
     public void moveFile(String filename, String path, String currentpath) {
@@ -248,12 +275,72 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void logIn(String username, String password, String path) {
-        if (jsonObject.size() == 0) {
+        //jsonObject.toString().isEmpty() == true
+
+        if (new File(path + osSeparator + "users.json").length() == 0) {
+            System.out.println("Null sam");
             createUser(username, password, 1, path);
+        } else {
+            //System.out.println("Ulogovao sam se " + username);
+//
+////            JsonArray jsonArray= user.getAsJsonArray(String.valueOf(user));
+////            for (JsonElement u:jsonArray){
+////                System.out.println(u.toString());
+////            }
+//
+
+
+
+//            try {
+//                // create Gson instance
+//                Gson gson = new GsonBuilder().setLenient().create();
+//
+//                // create a reader
+//                Reader reader = Files.newBufferedReader(Paths.get(path + osSeparator + "users.json"));
+//
+//                User user = gson.fromJson(reader,User.class);
+//
+//                // print user object
+//                System.out.println(user);
+//
+//                // close reader
+//                reader.close();
+//
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
+//            Gson g = new Gson();
+//
+//            User person = g.fromJson("{\"username\":\"ema\",\"password\":\"123\",\"level\":1}", User.class);
+//           // System.out.println(person.getUsername()); //John
+//
+//            System.out.println(g.toJson(person));
+            System.out.println("jebem ti mater");
+
+            try{
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                BufferedReader reader=new BufferedReader(new FileReader(path + osSeparator + "users.json"));
+                //System.out.println(reader.readLine());
+                Type userListType= new TypeToken<ArrayList<User>>() {}.getType();
+                System.out.println("tokeni");
+                ArrayList<User> userArray= gson.fromJson(reader,userListType);
+                System.out.println("size:"+userArray.size());
+                for (User u: userArray){
+                    System.out.println(u.toString());
+                }
+                reader.close();
+                System.out.println();
+            } catch (Exception e){
+
+            }
         }
+
+
         // ako je prazan json onda create user
         // else trazimo iz json-a da li je dobro
     }
+
+
 
     @Override
     public void logOut() {

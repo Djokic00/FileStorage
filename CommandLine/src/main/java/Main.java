@@ -12,6 +12,8 @@ public class Main {
     // /home/aleksa/Desktop/aa
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
+        Class localClass;
+        SpecificationClass local = null;
 
         String currentPath = "";
         String osSeparator;
@@ -29,11 +31,23 @@ public class Main {
 //            System.out.println("Password:");
 //            String password=input.nextLine();
 //            local.logIn(username,password);
+            localClass = Class.forName("LocalImplementation");
+            local = SpecificationManager.getExporter(currentPath);
             System.out.println("Ako zelite da napravite novo skladiste ukucajte ns i putanju do skladista");
-        } else currentPath = commandLine;
+        } else {
+            currentPath = commandLine;
+            localClass = Class.forName("LocalImplementation");
+            local = SpecificationManager.getExporter(currentPath);
 
-        Class localClass = Class.forName("LocalImplementation");
-        SpecificationClass local = SpecificationManager.getExporter(currentPath);
+            System.out.println("Username:");
+            String username = input.nextLine();
+            System.out.println("Password");
+            String password = input.nextLine();
+            local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
+
+        }
+
+
 
         while (true) {
             commandLine = input.nextLine();
@@ -54,6 +68,11 @@ public class Main {
                 System.out.println("Password");
                 String password = input.nextLine();
                 local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
+            }
+
+            else if (parameters[0].equals("newuser")){
+                local.createUser(parameters[1],parameters[2], Integer.parseInt(parameters[3]), currentPath + osSeparator + "rootDirectory");
+                System.out.println("napravio sam novog usera "+parameters[1]);
             }
 
 
