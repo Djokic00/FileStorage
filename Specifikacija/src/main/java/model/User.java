@@ -32,11 +32,11 @@ public class User {
         this.password = password;
     }
 
-    public Integer getNivo() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setNivo(Integer nivo) {
+    public void setLevel(Integer nivo) {
         this.level = level;
     }
 }

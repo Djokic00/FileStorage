@@ -19,6 +19,7 @@ public class Main {
         String osSeparator = File.separator;
         Scanner input = new Scanner(System.in);
         String commandLine;
+        String storagePath = "";
 
         localClass = Class.forName("LocalImplementation");
 
@@ -32,34 +33,36 @@ public class Main {
             if (parameters[0].equals("ns")) {
                 currentPath = "";
                 currentPath += parameters[1];
-                currentPath += osSeparator;
                 local = SpecificationManager.getExporter(currentPath);
-                System.out.println("Enter storage name");
-                String storageName = input.nextLine();
-                System.out.println("Set maximum size for the storage");
-                Long storageSize = Long.parseLong(input.nextLine());
+                //System.out.println(currentPath);
+                if (local.isStorage(currentPath) == false) {
+                    System.out.println("Enter storage name");
+                    String storageName = input.nextLine();
+                    System.out.println("Set maximum size for the storage");
+                    Long storageSize = Long.parseLong(input.nextLine());
 
-                local.createStorage(storageName, currentPath, storageSize);
-                currentPath += storageName;
-                String username;
-                String password;
-                if (local.getConnectedUser() == null) {
-                    System.out.println("Username:");
-                    username = input.nextLine();
-                    System.out.println("Password");
-                    password = input.nextLine();
-                }
-                else {
-                    username = local.getConnectedUser().getUsername();
-                    password = local.getConnectedUser().getPassword();
-                }
-                // username=u.getname
-                local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
+                    local.createStorage(storageName, currentPath, storageSize);
+                    currentPath += osSeparator;
+                    currentPath += storageName;
+                    storagePath = currentPath;
+                    String username;
+                    String password;
+                    if (local.getConnectedUser() == null) {
+                        System.out.println("Username:");
+                        username = input.nextLine();
+                        System.out.println("Password");
+                        password = input.nextLine();
+                    } else {
+                        username = local.getConnectedUser().getUsername();
+                        password = local.getConnectedUser().getPassword();
+                    }
+                    // username=u.getname
+                    local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
+                }else System.out.println("Your path is already storage");
             }
 
             else if (local.getConnectedUser() != null) {
                  if (parameters[0].equals("newuser")) {
-                     //proveri da li je superuser
                     local.createUser(parameters[1],parameters[2], Integer.parseInt(parameters[3]), currentPath + osSeparator + "rootDirectory");
                     System.out.println("new user created " + parameters[1]);
                 }
@@ -126,8 +129,9 @@ public class Main {
                     System.out.println("Unesite putanju nove lokacije:");
                     currentPath = input.nextLine();
                     String path1 = currentPath + osSeparator;
-
-                    local.moveFile(filename,path1,currentpath);
+                    if (currentPath.contains(storagePath)) {
+                        local.moveFile(filename, path1, currentpath);
+                    }
                     System.out.println("u metodi move sam "+ currentPath);
                 }
 
@@ -140,8 +144,18 @@ public class Main {
                 }
 
                 else if (parameters[0].equals("sort")) {
+                    if (parameters.length == 2){
                     local.sort(currentPath, parameters[1]);
+                    }else{
+                       // String option = parameters[2];
+                        local.sort(currentPath, parameters[1], parameters[2]);
+                    }
+
                 }
+
+                else if (parameters[0].equals("edit")) {
+                    local.editFile(currentPath + osSeparator + parameters[1]);
+                 }
 
                 else if (parameters[0].equals("download")) {
                     String filename = parameters[1];
@@ -158,8 +172,15 @@ public class Main {
                 }
 
                 else if (parameters[0].equals("list")) {
-                    int privilege = local.getConnectedUser().getNivo();
-                    if (privilege == 1) listAll();
+                    int privilege = local.getConnectedUser().getLevel();
+                    if (privilege == 1)  System.out.println("ns, mkdir, newuser, touch, ls, cd, .. , " +
+                            "pwd, login, logout, move, download, edit, rm, sort, exit");
+                    if (privilege == 2) System.out.println("ns, mkdir, touch, ls, cd, .. , " +
+                            "pwd, login, logout, move, download, edit rm, sort, exit");
+                    if (privilege == 3) System.out.println("ns, mkdir, touch, ls, cd, .. , " +
+                            "pwd, login, logout, edit, rm, sort, exit");
+                    if (privilege == 4) System.out.println("ns, ls, cd, .. , " +
+                            "pwd, login, logout, sort, exit");
                 }
 
                 else if (parameters[0].equals("login")) System.out.println("Already connected");
@@ -172,10 +193,11 @@ public class Main {
             }
 
             else if (parameters[0].equals("list")) {
-                System.out.println("You can only use ns or path");
+                System.out.println("You can only use ns, path or login");
             }
 
             else if (parameters[0].equals("login")) {
+                storagePath = currentPath;
                 System.out.println("Username:");
                 String username = input.nextLine();
                 System.out.println("Password");
@@ -229,7 +251,5 @@ public class Main {
         }
     }
 
-    static void listAll() {
-        System.out.println("ns, mkdir, touch, ls, cd, .. , pwd, login, logout, move, rm, sort, exit");
-    }
+
 }
