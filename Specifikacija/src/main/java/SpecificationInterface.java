@@ -1,3 +1,5 @@
+import model.User;
+
 import java.io.IOException;
 
 public interface SpecificationInterface {
@@ -20,8 +22,9 @@ public interface SpecificationInterface {
     void sort(String path, String option, String ... name); // sort
     //acs-desc; ime,datum....
 
-    void logIn(String username, String password, String path);
+    boolean logIn(String username, String password, String path);
     void logOut();
+    User getConnectedUser();
 
     boolean isStorage(String path);
 }

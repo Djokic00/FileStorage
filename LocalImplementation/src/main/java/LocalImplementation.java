@@ -26,6 +26,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     File users;
     File config;
     String osSeparator = File.separator;
+    User connectedUser;
 
     static {
         SpecificationManager.registerExporter(new LocalImplementation());
@@ -77,6 +78,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createStorage(String name, String path, Long storageSize, String... restrictions) {
+        jsonString = new StringBuilder();
         mapOfStorageSizes.put(path,storageSize);
         System.out.println(path+name);
         File storageFile = new File(path + name);
@@ -126,6 +128,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             User user = new User(username, password, level);
             if (new File(path + osSeparator + "users.json").length() == 0) {
                 FileWriter file = new FileWriter(path + osSeparator + "users.json");
+                System.out.println(path + osSeparator + "users.json");
                 System.out.println("Ulazi");
                 jsonString.append("[");
                 jsonString.append(gson.toJson(user));
@@ -135,6 +138,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             }
             else {
                 BufferedReader reader = new BufferedReader(new FileReader(path + osSeparator + "users.json"));
+                System.out.println(path + osSeparator + "users.json");
                 jsonString = new StringBuilder(reader.readLine());
                 jsonString.deleteCharAt(jsonString.length() - 1);
                 jsonString.append(",");
@@ -250,11 +254,13 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void logIn(String username, String password, String path) {
+    public boolean logIn(String username, String password, String path) {
 
         if (new File(path + osSeparator + "users.json").length() == 0) {
             System.out.println("Null sam");
             createUser(username, password, 1, path);
+            connectedUser = new User(username,password,1);
+            return true;
         }
         else {
             try {
@@ -264,27 +270,40 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 Type userListType = new TypeToken<ArrayList<User>>() {}.getType();
                 ArrayList<User> userArray = gson.fromJson(reader,userListType);
                 System.out.println("Number of users: " + userArray.size());
-                for (User user: userArray){
+                for (User user: userArray) {
                     if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-                        // konektuj usera
-                        System.out.println("Konektovan: " + user.getNivo());
+                        connectedUser = new User(username, password, user.getNivo());
+                        System.out.println("Connected: " + user.getNivo());
+                        return true;
                     }
                 }
                 reader.close();
-                System.out.println();
             } catch (Exception e){
-
+                e.printStackTrace();
             }
         }
+        return false;
     }
 
     @Override
     public void logOut() {
+        connectedUser = null;
+        System.out.println("Log out");
 
     }
 
     @Override
-    public boolean isStorage(String path) {
-        return true;
+    public boolean isStorage(String currentPath) {
+        String users = currentPath + osSeparator + "rootDirectory" + osSeparator + "users.json";
+        String config = currentPath + osSeparator + "rootDirectory" + osSeparator + "config.json";
+        Path pathToUsers = Paths.get(users);
+        Path pathToConfig = Paths.get(config);
+        if (Files.exists(pathToUsers) && Files.exists(pathToConfig)) return true;
+        else return false;
+    }
+
+    @Override
+    public User getConnectedUser() {
+        return connectedUser;
     }
 }
