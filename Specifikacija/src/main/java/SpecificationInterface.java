@@ -23,5 +23,5 @@ public interface SpecificationInterface {
     void logIn(String username, String password, String path);
     void logOut();
 
-
+    boolean isStorage(String path);
 }

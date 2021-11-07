@@ -14,55 +14,68 @@ public class Main {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Class localClass;
         SpecificationClass local = null;
-
+        boolean firstRead = false;
         String currentPath = "";
-        String osSeparator;
-
+        String osSeparator = "";
         Scanner input = new Scanner(System.in);
-        System.out.println("Unesite putanju do skladista: ");
+
+//        if (Files.exists(pathToStorage) == false) {
+//             localClass = Class.forName("LocalImplementation");
+//            local = SpecificationManager.getExporter(currentPath);
+//            System.out.println("Ako zelite da napravite novo skladiste ukucajte ns i putanju do skladista");
+//        } else {
+//            currentPath = commandLine;
+//            //localClass = Class.forName("LocalImplementation");
+//            local = SpecificationManager.getExporter(currentPath);
+//
+//
+//
+//        }
+
+        System.out.println("Enter path to the storage or make storage using ns command: ");
         String commandLine = input.nextLine();
 
-        Path pathToStorage = Paths.get(commandLine);
-        osSeparator = File.separator;
+        if (commandLine.startsWith("ns")) firstRead = true;
+        else {
+            Path pathToStorage = Paths.get(commandLine);
+            osSeparator = File.separator;
+            if (Files.exists(pathToStorage)) {
+                currentPath = commandLine;
+                localClass = Class.forName("LocalImplementation");
+                local = SpecificationManager.getExporter(currentPath);
+            }
 
-        if (Files.exists(pathToStorage) == false) {
-//            System.out.println("Username:");
-//            String username=input.nextLine();
-//            System.out.println("Password:");
-//            String password=input.nextLine();
-//            local.logIn(username,password);
-            localClass = Class.forName("LocalImplementation");
-            local = SpecificationManager.getExporter(currentPath);
-            System.out.println("Ako zelite da napravite novo skladiste ukucajte ns i putanju do skladista");
-        } else {
-            currentPath = commandLine;
-            localClass = Class.forName("LocalImplementation");
-            local = SpecificationManager.getExporter(currentPath);
-
-            System.out.println("Username:");
-            String username = input.nextLine();
-            System.out.println("Password");
-            String password = input.nextLine();
-            local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
-
+            if (local.isStorage(commandLine)) {
+                currentPath = commandLine;
+                local = SpecificationManager.getExporter(currentPath);
+                System.out.println("Enter username and password to connect");
+                System.out.println("Username:");
+                String username = input.nextLine();
+                System.out.println("Password");
+                String password = input.nextLine();
+                local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
+            }
+            else {
+                System.out.println("Error: not a storage");
+                currentPath = "";
+            }
         }
 
-
-
         while (true) {
-            commandLine = input.nextLine();
+            if (firstRead == true) firstRead = false;
+            else commandLine = input.nextLine();
             String parameters[] = commandLine.split(" ");
 
             if (parameters[0].equals("ns")) {
                 currentPath += parameters[1];
                 currentPath += osSeparator;
-                System.out.println("Unesite ime");
-                String ime = input.nextLine();
-                System.out.println("Unesite velicinu skladista");
+                System.out.println("Enter storage name");
+                String storageName = input.nextLine();
+                System.out.println("Set maximum size for the storage");
                 Long storageSize = Long.parseLong(input.nextLine());
 
-                local.createStorage(ime, currentPath, storageSize);
-                currentPath += ime;
+                local.createStorage(storageName, currentPath, storageSize);
+                currentPath += storageName;
                 System.out.println("Username:");
                 String username = input.nextLine();
                 System.out.println("Password");
@@ -72,7 +85,7 @@ public class Main {
 
             else if (parameters[0].equals("newuser")){
                 local.createUser(parameters[1],parameters[2], Integer.parseInt(parameters[3]), currentPath + osSeparator + "rootDirectory");
-                System.out.println("napravio sam novog usera "+parameters[1]);
+                System.out.println("new user created " + parameters[1]);
             }
 
 
@@ -86,8 +99,6 @@ public class Main {
                 if (parameters.length == 3)
                     local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]), currentPath);
                 else {
-
-                    // = new LocalImplementation();
                     local.createFile(parameters[1], currentPath);
                     System.out.println(currentPath);
                 }
@@ -106,7 +117,7 @@ public class Main {
                         Integer.parseInt(parameters[4]), currentPath);
                     }
                     else if (parameters.length <= 3)
-                        System.out.println("Too few arguments. Try 'mkdir --help' for more information");
+                        System.out.println("Too few arguments");
                 }
                 else {
                     if (parameters.length == 3) {
@@ -115,7 +126,7 @@ public class Main {
                         local.createDirectory(parameters[1], currentPath);
                         System.out.println(currentPath);
                     } else if (parameters.length > 3)
-                        System.out.println("Too many arguments.Try 'mkdir --help' for more information");
+                        System.out.println("Too many arguments");
                 }
             }
             else if (parameters[0].equals("rm")) {
@@ -134,9 +145,7 @@ public class Main {
             }
 
             else if (parameters[0].equals("move")) {
-                String currentpath = currentPath+osSeparator;
-
-                //move filename
+                String currentpath = currentPath + osSeparator;
                 String filename = parameters[1];
                 System.out.println("Unesite putanju nove lokacije:");
                 currentPath = input.nextLine();
@@ -155,11 +164,7 @@ public class Main {
             }
 
             else if (parameters[0].equals("sort")) {
-                try {
-                    local.sort(currentPath, parameters[1]);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                local.sort(currentPath, parameters[1]);
             }
 
             else if (parameters[0].equals("download")) {
