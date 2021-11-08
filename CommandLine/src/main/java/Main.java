@@ -43,7 +43,9 @@ public class Main {
                     local.createStorage(storageName, currentPath, storageSize);
                     currentPath += osSeparator;
                     currentPath += storageName;
-                    storagePath = currentPath;
+                    //storagePath = currentPath;
+                    local.getStorage().setPath(currentPath);
+                    System.out.println("Storage path is "+local.getStorage().getPath());
                     String username;
                     String password;
                     if (local.getConnectedUser() == null) {
@@ -128,11 +130,10 @@ public class Main {
                     System.out.println("Enter the path to the new location:");
                     String newPath = input.nextLine();
                     String path1 = newPath + osSeparator;
-                    if (newPath.contains(storagePath) && !newPath.contentEquals(System.getProperty("user.home"))&&
+                    if (newPath.contains(local.getStorage().getPath()) &&
                         !newPath.contains("rootDirectory")) {
                         local.moveFile(filename, path1, currentPath + osSeparator);
-                    }else if(newPath.contentEquals(System.getProperty("user.home"))) {
-                        System.out.println("Your path is outside of storage.");
+
                     } else if (newPath.contains("rootDirectory")){
                         System.out.println("You cannot move files to rootDirectory");
                     }
@@ -199,7 +200,9 @@ public class Main {
 
             else if (parameters[0].equals("login")) {
                 //currentPath=storagePath;
-                storagePath=currentPath;
+               //storagePath=currentPath;
+                currentPath=local.getStorage().getPath();
+                System.out.println("Storage path is "+currentPath);
                 //System.out.println("Storagepath: "+ storagePath);
                 //storagePath je prazan
                 System.out.println("Username:");
@@ -222,6 +225,7 @@ public class Main {
 
                 if (Files.exists(pathToStorage) && local.isStorage(parameters[1]) ) {
                     currentPath = parameters[1];
+                    local.getStorage().setPath(currentPath);
                     String username;
                     String password;
                     if (local.getConnectedUser() == null) {

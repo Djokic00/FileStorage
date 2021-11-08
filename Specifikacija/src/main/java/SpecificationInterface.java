@@ -1,3 +1,4 @@
+import model.FileStorage;
 import model.User;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public interface SpecificationInterface {
     boolean logIn(String username, String password, String path);
     void logOut();
     User getConnectedUser();
+    FileStorage getStorage();
 
     boolean isStorage(String path);
 }

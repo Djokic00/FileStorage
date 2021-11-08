@@ -28,6 +28,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     File config;
     String osSeparator = File.separator;
     User connectedUser;
+    FileStorage storage=new FileStorage();
 
     static {
         SpecificationManager.registerExporter(new LocalImplementation());
@@ -358,6 +359,10 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public User getConnectedUser() {
         return connectedUser;
+    }
+    @Override
+    public FileStorage getStorage() {
+        return storage;
     }
 
     public void unauthorizedAction(){
