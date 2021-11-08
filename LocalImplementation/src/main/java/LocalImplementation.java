@@ -1,11 +1,10 @@
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlAnnotationIntrospector;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import model.FileStorage;
 import model.User;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.*;
 import java.io.*;
@@ -19,6 +18,7 @@ import java.nio.file.attribute.FileTime;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class LocalImplementation extends SpecificationClass implements SpecificationInterface {
     HashMap<String, Long> mapOfStorageSizes = new HashMap<>();
@@ -36,14 +36,16 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createFile(String filename, String path) throws IOException {
-        if (connectedUser.getLevel()<4) {
+        if (connectedUser.getLevel() < 4) {
             File newFile = new File(path + osSeparator + filename);
-        /*
-            Restrikcije za skladiste => filename.endsWith("restrikcija") (npr .exe) onda
-            ispisujemo ne mozete dodati fajl u skladiste zbog exe ekstenzije. U suprotnom nastavljamo
-            sa kodom tj funkcijom
-            A posle moramo da proverimo kad napravimo falj da li moze da se skladisti zbog velicine
-        */
+
+            // Ovo radi samo za jedno skladiste jer ne izvlaci podatke iz config.json
+            if (storage.getRestriction() != null) {
+                if (filename.endsWith(storage.getRestriction())) {
+                    System.out.println("You cannot make file with " + storage.getRestriction() + " extension");
+                    return;
+                }
+            }
 
             if (mapOfDirRestrictions.containsKey(path) == true) {
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
@@ -60,7 +62,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createDirectory(String directoryName, String path, Integer... restriction) {
-        if (connectedUser.getLevel()<4) {
+        if (connectedUser.getLevel() < 4) {
             if (restriction.length > 0) {
                 mapOfDirRestrictions.put(path + osSeparator + directoryName, restriction[0]);
             }
@@ -80,9 +82,12 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createStorage(String name, String path, Long storageSize, String... restrictions) {
+        if (restrictions.length > 0) storage.setRestriction(restrictions[0]);
+
         jsonString = new StringBuilder();
-        mapOfStorageSizes.put(path,storageSize);
+        mapOfStorageSizes.put(path, storageSize);
         System.out.println("Storagepath: "+ path + osSeparator + name);
+
         File storageFile = new File(path +osSeparator+ name);
         storageFile.mkdir();
         String rootDirPath = path + osSeparator + name + osSeparator + "rootDirectory";
@@ -127,7 +132,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     System.out.println("Error: File not created");
                 }
             }
-        }else unauthorizedAction();
+        } else unauthorizedAction();
     }
 
     @Override
@@ -209,15 +214,16 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         } else unauthorizedAction();
     }
 
+
     public void deleteDirectory(File file) {
-        if (connectedUser.getLevel()<4) {
+        if (connectedUser.getLevel() < 4) {
             for (File subfile : file.listFiles()) {
                 if (subfile.isDirectory()) {
                     deleteDirectory(subfile);
                 }
                 subfile.delete();
             }
-        }else unauthorizedAction();
+        } else unauthorizedAction();
     }
 
     @Override
@@ -233,21 +239,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                             System.out.println(f.getName());
                     }
                 }
-//                  neki random datumi
-//                BasicFileAttributes attrs = null;
-//                try {
-//                    attrs = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
-//                    FileTime time = attrs.creationTime();
-//                    String pattern = "yyyy-MM-dd HH:mm:ss";
-//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-//
-//                    String formatted = simpleDateFormat.format(new Date(time.toMillis()));
-//
-//                    // System.out.println(  f.getName()+" je kreiran " + formatted );
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-                //System.out.println(f); printuje celu putanju
             }
         }
     }
@@ -274,39 +265,38 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 }
             }
             else if (option[0].equals("size")) {
-
-//                if (order.equals("asc")) {
-//                    //Arrays.sort(list, SIZE_COMPARATOR);
-//                    //FileSortBySize.displayFileOrder(files, false);
-//
-//
-//                        Arrays.sort(list, 0, list.length);
-//
-//
-//
-//                }
-//                else if (order.equals("desc")) {
-//                    Arrays.sort(list, Comparator.comparingLong(File::lastModified).reversed());
-//                }
-//            }
+                HashMap<String, Long> mapOfFiles = new HashMap<>();
+                for (File f : list) {
+                    if (f.isDirectory()) mapOfFiles.put(f.getName(), FileUtils.sizeOfDirectory(f));
+                    else mapOfFiles.put(f.getName(), f.length());
+                }
+                if (order.equals("asc")) {
+                    mapOfFiles.entrySet()
+                            .stream()
+                            .sorted(Map.Entry.comparingByValue())
+                            .forEach(System.out::println);
+                }
+                else if (order.equals("desc")) {
+                    mapOfFiles.entrySet()
+                            .stream()
+                            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                            .forEach(System.out::println);
+                }
             }
-        }
-
-        for (File files : list) {
-            System.out.println(files.getName());
         }
     }
 
     @Override
     public void editFile(String filePath) {
-        if (connectedUser.getLevel() < 4) {
-            File file = new File(filePath);
-            try {
-                Desktop.getDesktop().open(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else unauthorizedAction();
+        File file = new File(filePath);
+        if (connectedUser.getLevel() < 4) file.setWritable(true);
+        else file.setWritable(false);
+
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -360,6 +350,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public User getConnectedUser() {
         return connectedUser;
     }
+
     @Override
     public FileStorage getStorage() {
         return storage;

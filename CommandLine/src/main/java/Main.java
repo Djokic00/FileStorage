@@ -39,8 +39,10 @@ public class Main {
                     String storageName = input.nextLine();
                     System.out.println("Set maximum size of the storage:");
                     Long storageSize = Long.parseLong(input.nextLine());
-
-                    local.createStorage(storageName, currentPath, storageSize);
+                    System.out.println("Set storage restriction or type n to abort:");
+                    String restriction = input.nextLine();
+                    if (restriction.equals("n")) local.createStorage(storageName, currentPath, storageSize);
+                    else local.createStorage(storageName, currentPath, storageSize, restriction);
                     currentPath += osSeparator;
                     currentPath += storageName;
                     //storagePath = currentPath;
@@ -51,9 +53,6 @@ public class Main {
                     if (local.getConnectedUser() == null) {
                         System.out.println("Username:");
                         username = input.nextLine();
-                        //nevidljiva sifra ne moze jer Intellij ne podrzava Console klasu
-                        //java.io.Console console = System.console();
-                        //password = new String(console.readPassword("Password: "));
                         System.out.println("Password:");
                         password = input.nextLine();
                     } else {
@@ -199,19 +198,12 @@ public class Main {
             }
 
             else if (parameters[0].equals("login")) {
-                //currentPath=storagePath;
-               //storagePath=currentPath;
-                currentPath=local.getStorage().getPath();
-                System.out.println("Storage path is "+currentPath);
-                //System.out.println("Storagepath: "+ storagePath);
-                //storagePath je prazan
+                currentPath = local.getStorage().getPath();
+                System.out.println("Storage path is " + currentPath);
                 System.out.println("Username:");
                 String username = input.nextLine();
                 System.out.println("Password:");
                 String password = input.nextLine();
-
-                //Ako je u nekom direktorijumu u skladistu onda ovde puca jer ne treba da mu se
-                //prosledi trenutna putanja nego putanja skladista
                 local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
             }
 
@@ -260,6 +252,4 @@ public class Main {
             }
         }
     }
-
-
 }
