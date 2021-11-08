@@ -54,7 +54,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             } else {
                 newFile.createNewFile();
             }
-        } else System.out.println("Level 4");
+        } else unauthorizedAction();
     }
 
     @Override
@@ -70,19 +70,18 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 if (numberOfFilesLeft > 0) {
                     newDir.mkdir();
                     mapOfDirRestrictions.put(path, --numberOfFilesLeft);
-                } else System.out.println("Nema mesta");
+                } else System.out.println("Folder is full!");
             } else {
                 newDir.mkdir();
-                System.out.println("Ulazi ovde");
             }
-        }
+        } else unauthorizedAction();
     }
 
     @Override
     public void createStorage(String name, String path, Long storageSize, String... restrictions) {
         jsonString = new StringBuilder();
         mapOfStorageSizes.put(path,storageSize);
-        System.out.println(path + osSeparator + name);
+        System.out.println("Storagepath: "+ path + osSeparator + name);
         File storageFile = new File(path +osSeparator+ name);
         storageFile.mkdir();
         String rootDirPath = path + osSeparator + name + osSeparator + "rootDirectory";
@@ -106,7 +105,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             }
             if (numberOfDirectories == 0) createDirectory(dirName + '0', path);
 
-        }
+        }else unauthorizedAction();
     }
     @Override
     public void createListOfDirRestriction(String dirName, Integer restriction, Integer numberOfDirectories, String path) {
@@ -114,7 +113,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         for (int i = 0; i < numberOfDirectories; i++) {
             createDirectory(dirName + i, path, restriction);
         }
-        }
+        }else unauthorizedAction();
     }
 
     @Override
@@ -127,7 +126,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     System.out.println("Error: File not created");
                 }
             }
-        }
+        }else unauthorizedAction();
     }
 
     @Override
@@ -138,8 +137,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 User user = new User(username, password, level);
                 if (new File(path + osSeparator + "users.json").length() == 0) {
                     FileWriter file = new FileWriter(path + osSeparator + "users.json");
-                    System.out.println(path + osSeparator + "users.json");
-                    System.out.println("Ulazi");
+                    System.out.println("Creating users.json file on path: " + path + osSeparator + "users.json");
                     jsonString.append("[");
                     jsonString.append(gson.toJson(user));
                     jsonString.append("]");
@@ -148,7 +146,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 }
                 else {
                     BufferedReader reader = new BufferedReader(new FileReader(path + osSeparator + "users.json"));
-                    System.out.println(path + osSeparator + "users.json");
+                    System.out.println("Creating users.json file on path: " + path + osSeparator + "users.json");
                     jsonString = new StringBuilder(reader.readLine());
                     jsonString.deleteCharAt(jsonString.length() - 1);
                     jsonString.append(",");
@@ -162,35 +160,36 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }  else System.out.println("smislicemo nesto");
-
+        }  else unauthorizedAction();
     }
 
     @Override
     public void moveFile(String filename, String path, String currentpath) {
         if (connectedUser.getLevel()<3) {
             try {
-                Files.move(Paths.get(currentpath + filename), Paths.get(path + filename), StandardCopyOption.REPLACE_EXISTING);
+                Files.move(Paths.get(currentpath + osSeparator+filename), Paths.get(path + filename), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                e.printStackTrace();
+
             }
-        }
+        }else unauthorizedAction();
     }
 
     @Override
     public void downloadFile(String filename, String path) {
         if (connectedUser.getLevel()<3) {
+            Path downloadDir=Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
+            if (!Files.exists(downloadDir)){
+                createDirectory("StorageDownloads",System.getProperty("user.home"));
+            }
             try {
-                Path newDir = Paths.get(System.getProperty("user.home"));
-                Files.copy(Paths.get(path + osSeparator + filename), newDir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Kopirao sam: " + filename);
+                Files.copy(Paths.get(path + osSeparator + filename), downloadDir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Download completed: " + filename);
 
             } catch (IOException e) {
-                e.printStackTrace();
+                    e.printStackTrace();
             }
-        }
+        } else unauthorizedAction();
     }
-
 
     @Override
     public void deleteFile(String filename, String path) {
@@ -200,13 +199,13 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 deleteDirectory(file);
             }
             boolean deleted = file.delete();
-            if (deleted == false) System.out.println("File is not in this folder");
+            if (deleted == false) System.out.println("File is not in this folder.");
 
             if (mapOfDirRestrictions.containsKey(path) == true) {
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(path);
                 mapOfDirRestrictions.put(path, ++numberOfFilesLeft);
             }
-        }
+        } else unauthorizedAction();
     }
 
     public void deleteDirectory(File file) {
@@ -217,7 +216,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 }
                 subfile.delete();
             }
-        }
+        }else unauthorizedAction();
     }
 
     @Override
@@ -233,24 +232,23 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                             System.out.println(f.getName());
                     }
                 }
-
-                BasicFileAttributes attrs = null;
-                try {
-                    attrs = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
-                    FileTime time = attrs.creationTime();
-                    String pattern = "yyyy-MM-dd HH:mm:ss";
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-
-                    String formatted = simpleDateFormat.format(new Date(time.toMillis()));
-
-                    // System.out.println(  f.getName()+" je kreiran " + formatted );
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                  neki random datumi
+//                BasicFileAttributes attrs = null;
+//                try {
+//                    attrs = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
+//                    FileTime time = attrs.creationTime();
+//                    String pattern = "yyyy-MM-dd HH:mm:ss";
+//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+//
+//                    String formatted = simpleDateFormat.format(new Date(time.toMillis()));
+//
+//                    // System.out.println(  f.getName()+" je kreiran " + formatted );
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
                 //System.out.println(f); printuje celu putanju
             }
         }
-
     }
 
     @Override
@@ -275,6 +273,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 }
             }
             else if (option[0].equals("size")) {
+
 //                if (order.equals("asc")) {
 //                    //Arrays.sort(list, SIZE_COMPARATOR);
 //                    //FileSortBySize.displayFileOrder(files, false);
@@ -292,8 +291,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             }
         }
 
-
-
         for (File files : list) {
             System.out.println(files.getName());
         }
@@ -308,15 +305,14 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-
+        }else unauthorizedAction();
     }
 
     @Override
     public boolean logIn(String username, String password, String path) {
 
         if (new File(path + osSeparator + "users.json").length() == 0) {
-            System.out.println("Null sam");
+            //System.out.println("Users.json is empty.");
             createUser(username, password, 1, path);
             connectedUser = new User(username,password,1);
             return true;
@@ -331,7 +327,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 for (User user: userArray) {
                     if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                         connectedUser = new User(username, password, user.getLevel());
-                        System.out.println("Connected: " + user.getUsername() + " privilege " + user.getLevel());
+                        System.out.println("Connected user: " + user.getUsername() + "; Privilege: " + user.getLevel());
                         return true;
                     }
                 }
@@ -347,7 +343,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public void logOut() {
         connectedUser = null;
         System.out.println("Log out");
-
     }
 
     @Override
@@ -363,5 +358,9 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public User getConnectedUser() {
         return connectedUser;
+    }
+
+    public void unauthorizedAction(){
+        System.out.println("Unauthorized action. Level: " + connectedUser.getLevel());
     }
 }

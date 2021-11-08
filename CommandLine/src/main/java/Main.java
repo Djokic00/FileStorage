@@ -34,11 +34,10 @@ public class Main {
                 currentPath = "";
                 currentPath += parameters[1];
                 local = SpecificationManager.getExporter(currentPath);
-                //System.out.println(currentPath);
                 if (local.isStorage(currentPath) == false) {
-                    System.out.println("Enter storage name");
+                    System.out.println("Enter storage name:");
                     String storageName = input.nextLine();
-                    System.out.println("Set maximum size for the storage");
+                    System.out.println("Set maximum size of the storage:");
                     Long storageSize = Long.parseLong(input.nextLine());
 
                     local.createStorage(storageName, currentPath, storageSize);
@@ -50,27 +49,29 @@ public class Main {
                     if (local.getConnectedUser() == null) {
                         System.out.println("Username:");
                         username = input.nextLine();
-                        System.out.println("Password");
+                        //nevidljiva sifra ne moze jer Intellij ne podrzava Console klasu
+                        //java.io.Console console = System.console();
+                        //password = new String(console.readPassword("Password: "));
+                        System.out.println("Password:");
                         password = input.nextLine();
                     } else {
                         username = local.getConnectedUser().getUsername();
                         password = local.getConnectedUser().getPassword();
                     }
-                    // username=u.getname
                     local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
-                }else System.out.println("Your path is already storage");
+                }else System.out.println("Your path is already a storage.");
             }
 
             else if (local.getConnectedUser() != null) {
                  if (parameters[0].equals("newuser")) {
                     local.createUser(parameters[1],parameters[2], Integer.parseInt(parameters[3]), currentPath + osSeparator + "rootDirectory");
-                    System.out.println("new user created " + parameters[1]);
+                    System.out.println("New user created: " + parameters[1]);
                 }
 
                 else if (parameters[0].equals("cd")) {
                     currentPath += osSeparator;
                     currentPath += parameters[1];
-                    System.out.println(currentPath);
+                    System.out.println("Currentpath: " + currentPath);
                 }
 
                 else if (parameters[0].equals("touch")) {
@@ -78,13 +79,13 @@ public class Main {
                         local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]), currentPath);
                     else {
                         local.createFile(parameters[1], currentPath);
-                        System.out.println(currentPath);
+                        System.out.println("Currentpath: " + currentPath);
                     }
                 }
 
                 else if (parameters[0].equals("mkdir")) {
                     if (parameters.length == 1) {
-                        System.out.println("You must enter a name for the folder");
+                        System.out.println("You must enter a name for the folder.");
                     }
                     else if (parameters[1].equals("-res")) {
                         if (parameters.length == 4) {
@@ -95,16 +96,15 @@ public class Main {
                                     Integer.parseInt(parameters[4]), currentPath);
                         }
                         else if (parameters.length <= 3)
-                            System.out.println("Too few arguments");
+                            System.out.println("Too few arguments.");
                     }
                     else {
                         if (parameters.length == 3) {
                             local.createListOfDirectories(parameters[1], Integer.parseInt(parameters[2]), currentPath);
                         } else if (parameters.length == 2) {
                             local.createDirectory(parameters[1], currentPath);
-                            System.out.println(currentPath);
                         } else if (parameters.length > 3)
-                            System.out.println("Too many arguments");
+                            System.out.println("Too many arguments.");
                     }
                 }
 
@@ -120,19 +120,23 @@ public class Main {
                         currentPath += separator[i];
                         if (i != separator.length - 2) currentPath += osSeparator;
                     }
-                    System.out.println(currentPath);
+                    System.out.println("Currentpath: " + currentPath);
                 }
 
                 else if (parameters[0].equals("move")) {
-                    String currentpath = currentPath + osSeparator;
                     String filename = parameters[1];
-                    System.out.println("Unesite putanju nove lokacije:");
-                    currentPath = input.nextLine();
-                    String path1 = currentPath + osSeparator;
-                    if (currentPath.contains(storagePath)) {
-                        local.moveFile(filename, path1, currentpath);
+                    System.out.println("Enter the path to the new location:");
+                    String newPath = input.nextLine();
+                    String path1 = newPath + osSeparator;
+                    if (newPath.contains(storagePath) && !newPath.contentEquals(System.getProperty("user.home"))&&
+                        !newPath.contains("rootDirectory")) {
+                        local.moveFile(filename, path1, currentPath + osSeparator);
+                    }else if(newPath.contentEquals(System.getProperty("user.home"))) {
+                        System.out.println("Your path is outside of storage.");
+                    } else if (newPath.contains("rootDirectory")){
+                        System.out.println("You cannot move files to rootDirectory");
                     }
-                    System.out.println("u metodi move sam "+ currentPath);
+                    System.out.println("Currentpath: " + currentPath);
                 }
 
                 else if (parameters[0].equals("ls")) {
@@ -145,26 +149,23 @@ public class Main {
 
                 else if (parameters[0].equals("sort")) {
                     if (parameters.length == 2){
-                    local.sort(currentPath, parameters[1]);
+                        local.sort(currentPath, parameters[1]);
                     }else{
-                       // String option = parameters[2];
                         local.sort(currentPath, parameters[1], parameters[2]);
                     }
-
                 }
 
                 else if (parameters[0].equals("edit")) {
                     local.editFile(currentPath + osSeparator + parameters[1]);
-                 }
+                }
 
                 else if (parameters[0].equals("download")) {
                     String filename = parameters[1];
-                    System.out.println("u download metodi sam " + currentPath);
                     local.downloadFile(filename,currentPath);
                 }
 
                 else if (parameters[0].equals("pwd")) {
-                    System.out.println(currentPath);
+                    System.out.println("Currentpath: " + currentPath);
                 }
 
                 else if (parameters[0].equals("logout")) {
@@ -183,9 +184,9 @@ public class Main {
                             "pwd, login, logout, sort, exit");
                 }
 
-                else if (parameters[0].equals("login")) System.out.println("Already connected");
+                else if (parameters[0].equals("login")) System.out.println("Already connected.");
 
-                else if (parameters[0].equals("exit")) System.out.println("First disconnect using logout command");
+                else if (parameters[0].equals("exit")) System.out.println("First disconnect using logout command.");
 
                 else {
                     System.out.println(parameters[0] + " command not found");
@@ -193,15 +194,21 @@ public class Main {
             }
 
             else if (parameters[0].equals("list")) {
-                System.out.println("You can only use ns, path or login");
+                System.out.println("You can only use ns, path or login command.");
             }
 
             else if (parameters[0].equals("login")) {
-                storagePath = currentPath;
+                //currentPath=storagePath;
+                storagePath=currentPath;
+                //System.out.println("Storagepath: "+ storagePath);
+                //storagePath je prazan
                 System.out.println("Username:");
                 String username = input.nextLine();
-                System.out.println("Password");
+                System.out.println("Password:");
                 String password = input.nextLine();
+
+                //Ako je u nekom direktorijumu u skladistu onda ovde puca jer ne treba da mu se
+                //prosledi trenutna putanja nego putanja skladista
                 local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
             }
 
@@ -218,21 +225,20 @@ public class Main {
                     String username;
                     String password;
                     if (local.getConnectedUser() == null) {
-                        System.out.println("Enter username and password to connect");
+                        System.out.println("Enter username and password to connect.");
                         System.out.println("Username:");
                         username = input.nextLine();
-                        System.out.println("Password");
+                        System.out.println("Password:");
                         password = input.nextLine();
                     } else {
                         username = local.getConnectedUser().getUsername();
                         password = local.getConnectedUser().getPassword();
                         System.out.println(username + " " + password);
                     }
-                        //password = u.getpassword
 
                     boolean connected = local.logIn(username, password, currentPath + osSeparator + "rootDirectory");
-                    if (connected == true) System.out.println("Successfully connected");
-                    else System.out.println("Not connected");
+                    if (connected == true) System.out.println("Successfully connected!");
+                    else System.out.println("Not connected!");
                         //dodaj if
                         //koji je nivo
 
