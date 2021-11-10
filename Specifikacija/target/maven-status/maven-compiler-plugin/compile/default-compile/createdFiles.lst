@@ -1,3 +1,5 @@
 SpecificationInterface.class
 SpecificationClass.class
+model\FileStorage.class
 SpecificationManager.class
+model\User.class

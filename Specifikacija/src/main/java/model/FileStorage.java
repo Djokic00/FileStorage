@@ -3,7 +3,8 @@ package model;
 public class FileStorage {
     Boolean connection = false;
     String restriction;
-    String path;
+    String storagePath;
+    String currentPath;
 
     public String getRestriction() {
         return restriction;
@@ -21,11 +22,19 @@ public class FileStorage {
         this.connection = connection;
     }
 
-    public String getPath() {
-        return path;
+    public String getStoragePath() {
+        return storagePath;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+
+    public String getCurrentPath() {
+        return currentPath;
+    }
+
+    public void setCurrentPath(String currentPath) {
+        this.currentPath = currentPath;
     }
 }

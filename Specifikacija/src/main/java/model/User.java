@@ -12,10 +12,6 @@ public class User {
         this.level = level;
     }
 
-    //nivo 1
-    //nivo 2
-    //nivo 3
-
     public String getUsername() {
         return username;
     }
