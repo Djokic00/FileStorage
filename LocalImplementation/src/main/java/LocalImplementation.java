@@ -47,8 +47,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(getStorage().getCurrentPath());
                 if (numberOfFilesLeft > 0) {
                     newFile.createNewFile();
-                    numberOfFilesLeft--;
-                    mapOfDirRestrictions.put(fileStorage.getCurrentPath(), numberOfFilesLeft);
+                    mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
                 }
                 else System.out.println("Folder is full!");
             } else {
@@ -70,13 +69,21 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
                 System.out.println(fileStorage.getCurrentPath());
                 if (numberOfFilesLeft > 0) {
-                    newDir.mkdir();
-                    mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
+                    if (fileStorage.getSize() - 4096 > 0) {
+                        newDir.mkdir();
+                        mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
+                        fileStorage.setSize(fileStorage.getSize() - 4096);
+                    }
+
                 }
                 else System.out.println("Folder is full!");
             } else {
                 System.out.println(fileStorage.getCurrentPath());
-                newDir.mkdir();
+                if (fileStorage.getSize() - 4096 > 0) {
+                    newDir.mkdir();
+                    fileStorage.setSize(fileStorage.getSize() - 4096);
+                    System.out.println(fileStorage.getSize());
+                }
             }
         } else unauthorizedAction();
     }
@@ -310,11 +317,16 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             if (file.isDirectory()) {
                 deleteDirectory(file);
             }
-            boolean deleted = file.delete();
+            long fileSize = file.length();
+            //System.out.println(file.getName());
+            if (file.delete()) {
+                fileStorage.setSize(fileStorage.getSize() + fileSize);
+                //System.out.println(fileStorage.getSize());
+            }
           //  if (deleted == false) System.out.println("File is not in this folder.");
 
-            if (mapOfDirRestrictions.containsKey(getStorage().getCurrentPath()) == true) {
-                Integer numberOfFilesLeft = mapOfDirRestrictions.get(getStorage().getCurrentPath());
+            if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
                 mapOfDirRestrictions.put(getStorage().getCurrentPath(), ++numberOfFilesLeft);
             }
         } else unauthorizedAction();
@@ -328,7 +340,13 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 if (subfile.isDirectory()) {
                     deleteDirectory(subfile);
                 }
-                subfile.delete();
+                long fileSize = subfile.length();
+                System.out.println(subfile.getName());
+                if (subfile.delete()) {
+                    fileStorage.setSize(fileStorage.getSize() + fileSize);
+                    //System.out.println(fileStorage.getSize());
+                }
+
             }
         } else unauthorizedAction();
     }

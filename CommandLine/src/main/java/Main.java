@@ -109,8 +109,7 @@ public class Main {
                             System.out.println("Password:");
                             String password = input.nextLine();
                             boolean connected = local.logIn(username, password);
-                            if (connected == true)
-                                System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+                            if (connected == true) System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                             else System.out.println("Not connected!");
                         }
                     } catch (Exception e) {
@@ -119,8 +118,10 @@ public class Main {
 
                 } else if (parameters[0].equals("touch")) {
                     try {
-                        if (parameters.length == 1)
+                        if (parameters.length == 1) {
                             System.out.println("Error: You must enter a name for the file.");
+                            continue;
+                        }
 
                         if (parameters.length == 3)
                             local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]));
@@ -135,6 +136,7 @@ public class Main {
                     try {
                         if (parameters.length == 1) {
                             System.out.println("Error: You must enter a name for the folder.");
+                            continue;
                         } else if (parameters[1].equals("-res")) {
                             if (parameters.length == 4) {
                                 local.createDirectory(parameters[2], Integer.parseInt(parameters[3]));
