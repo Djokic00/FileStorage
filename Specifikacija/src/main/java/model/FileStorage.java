@@ -1,10 +1,40 @@
 package model;
 
+import java.io.File;
+import java.util.HashMap;
+
 public class FileStorage {
     Boolean connection = false;
     String restriction;
     String storagePath;
     String currentPath;
+    Long size;
+    HashMap<String, Integer> folderRestrictions;
+
+    public FileStorage(Long size) {
+        this.size = size;
+    }
+
+    public FileStorage(Long size, String restriction) {
+        this.size = size;
+        this.restriction = restriction;
+    }
+
+    public FileStorage(Long size, String restriction, HashMap<String, Integer> folderRestrictions) {
+        this.size = size;
+        this.restriction = restriction;
+        this.folderRestrictions = folderRestrictions;
+    }
+
+    public FileStorage() {}
+
+    public void setFolderRestrictions(HashMap<String, Integer> folderRestrictions) {
+        this.folderRestrictions = folderRestrictions;
+    }
+
+    public HashMap<String, Integer> getFolderRestrictions() {
+        return folderRestrictions;
+    }
 
     public String getRestriction() {
         return restriction;
@@ -36,5 +66,13 @@ public class FileStorage {
 
     public void setCurrentPath(String currentPath) {
         this.currentPath = currentPath;
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
     }
 }

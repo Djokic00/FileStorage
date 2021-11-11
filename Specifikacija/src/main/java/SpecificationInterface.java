@@ -30,6 +30,6 @@ public interface SpecificationInterface {
     void logOut();
     User getConnectedUser();
     FileStorage getStorage();
-
+    void readConfig(String path);
     boolean isStorage(String path);
 }

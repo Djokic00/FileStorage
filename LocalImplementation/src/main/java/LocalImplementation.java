@@ -1,11 +1,9 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import model.FileStorage;
 import model.User;
 import org.apache.commons.io.FileUtils;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Type;
@@ -14,22 +12,18 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class LocalImplementation extends SpecificationClass implements SpecificationInterface {
-    HashMap<String, Long> mapOfStorageSizes = new HashMap<>();
     HashMap<String, Integer> mapOfDirRestrictions = new HashMap<>();
-    StringBuilder jsonString = new StringBuilder();
+    StringBuilder jsonForUser = new StringBuilder();
+    StringBuilder jsonForStorage = new StringBuilder();
     File users;
     File config;
     String osSeparator = File.separator;
     User connectedUser;
-    FileStorage storage=new FileStorage();
-   // ObjectMapper objectMapper = new ObjectMapper();
+    FileStorage fileStorage = new FileStorage();
 
 
     // Djokic: sort i ls treba da vracaju niz!!! config fajl!
 
-    // Kada koristimo Petrov kod, USERS.JSON se pravi bez uglastih zagrada. Da li je to ispravno?
-    // onda nam puca prilikom logovanja jer ne ucita pravilno users.json
-    // njegovo sam ostavila zakomentarisano
 
     // treba ubaciti neki errorhandler u specifikaciju i dodati sve exceptione
 
@@ -42,22 +36,21 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         if (connectedUser.getLevel() < 4) {
             File newFile = new File(getStorage().getCurrentPath() + osSeparator + filename);
 
-            // Ovo radi samo za jedno skladiste jer ne izvlaci podatke iz config.json
-            if (storage.getRestriction() != null) {
-                if (filename.endsWith(storage.getRestriction())) {
-                   // System.out.println("You cannot make file with " + storage.getRestriction() + " extension");
+            if (fileStorage.getRestriction() != null) {
+                if (filename.endsWith(fileStorage.getRestriction())) {
+                    System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
                     return;
                 }
             }
 
-            if (mapOfDirRestrictions.containsKey(getStorage().getCurrentPath()) == true) {
+            if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(getStorage().getCurrentPath());
                 if (numberOfFilesLeft > 0) {
                     newFile.createNewFile();
                     numberOfFilesLeft--;
-                    mapOfDirRestrictions.put(getStorage().getCurrentPath(), numberOfFilesLeft);
+                    mapOfDirRestrictions.put(fileStorage.getCurrentPath(), numberOfFilesLeft);
                 }
-                //else System.out.println("Folder is full!");
+                else System.out.println("Folder is full!");
             } else {
                 newFile.createNewFile();
             }
@@ -69,17 +62,20 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         if (connectedUser.getLevel() < 4) {
             if (restriction.length > 0) {
                 mapOfDirRestrictions.put(getStorage().getCurrentPath() + osSeparator + directoryName, restriction[0]);
+                fileStorage.setFolderRestrictions(mapOfDirRestrictions);
             }
-            File newDir = new File(getStorage().getCurrentPath() + osSeparator + directoryName);
+            File newDir = new File(fileStorage.getCurrentPath() + osSeparator + directoryName);
 
-            if (mapOfDirRestrictions.containsKey(getStorage().getCurrentPath()) == true) {
-                Integer numberOfFilesLeft = mapOfDirRestrictions.get(getStorage().getCurrentPath());
+            if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
+                System.out.println(fileStorage.getCurrentPath());
                 if (numberOfFilesLeft > 0) {
                     newDir.mkdir();
-                    mapOfDirRestrictions.put(getStorage().getCurrentPath(), --numberOfFilesLeft);
+                    mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
                 }
-                //else System.out.println("Folder is full!");
+                else System.out.println("Folder is full!");
             } else {
+                System.out.println(fileStorage.getCurrentPath());
                 newDir.mkdir();
             }
         } else unauthorizedAction();
@@ -87,11 +83,14 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void createStorage(String name, String path, Long storageSize, String... restrictions) {
-        if (restrictions.length > 0) storage.setRestriction(restrictions[0]);
+        if (restrictions.length > 0) {
+            fileStorage = new FileStorage(storageSize, restrictions[0]);
+        }
+        else fileStorage = new FileStorage(storageSize);
 
-        jsonString = new StringBuilder();
-        mapOfStorageSizes.put(path, storageSize);
-        getStorage().setStoragePath(path + osSeparator + name);
+        jsonForUser = new StringBuilder();
+        //mapOfStorageSizes.put(path, storageSize);
+        fileStorage.setStoragePath(path + osSeparator + name);
 
         File storageFile = new File(getStorage().getStoragePath());
         storageFile.mkdir();
@@ -106,7 +105,8 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         } catch (IOException e) {
             e.printStackTrace();
         }
-        getStorage().setCurrentPath(getStorage().getStoragePath());
+        fileStorage.setCurrentPath(getStorage().getStoragePath());
+        writeToConfig(fileStorage);
     }
 
     @Override
@@ -145,35 +145,26 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public void createUser(String username, String password, Integer level) {
         if ((connectedUser == null) || connectedUser.getLevel() == 1) {
             try {
-
-//                File file=new File(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json");
-//                    String json= objectMapper.writeValueAsString(new User(username, password, level));
-//                if (!file.exists()){
-//                    Files.write(file.toPath(), Arrays.asList(json), StandardOpenOption.CREATE);
-//                }else {
-//                    Files.write(file.toPath(), Arrays.asList(json), StandardOpenOption.APPEND);
-//                }
-
                 Gson gson = new Gson();
                 User user = new User(username, password, level);
                 if (new File(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json").length() == 0) {
                     FileWriter file = new FileWriter(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json");
-                    jsonString.append("[");
-                    jsonString.append(gson.toJson(user));
-                    jsonString.append("]");
-                    file.write(String.valueOf(jsonString));
+                    jsonForUser.append("[");
+                    jsonForUser.append(gson.toJson(user));
+                    jsonForUser.append("]");
+                    file.write(String.valueOf(jsonForUser));
                     file.close();
                 }
                 else {
                     BufferedReader reader = new BufferedReader(new FileReader(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json"));
-                    jsonString = new StringBuilder(reader.readLine());
-                    jsonString.deleteCharAt(jsonString.length() - 1);
-                    jsonString.append(",");
-                    jsonString.append(gson.toJson(user));
-                    jsonString.append("]");
+                    jsonForUser = new StringBuilder(reader.readLine());
+                    jsonForUser.deleteCharAt(jsonForUser.length() - 1);
+                    jsonForUser.append(",");
+                    jsonForUser.append(gson.toJson(user));
+                    jsonForUser.append("]");
                     //System.out.println(jsonString);
                     FileWriter file = new FileWriter(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json");
-                    file.write(String.valueOf(jsonString));
+                    file.write(String.valueOf(jsonForUser));
                     file.close();
                 }
             } catch (IOException e) {
@@ -181,6 +172,45 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             }
         }  else unauthorizedAction();
     }
+
+    void writeToConfig(Object object,  HashMap<String, Integer> ... dirRestriction) {
+        if (object instanceof FileStorage) fileStorage = (FileStorage) object;
+        Gson gson = new Gson();
+        String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "config.json";
+        try {
+            FileWriter file = new FileWriter(path, false);
+            jsonForStorage = new StringBuilder();
+            jsonForStorage.append("[");
+            jsonForStorage.append(gson.toJson(fileStorage));
+            jsonForStorage.append("]");
+            file.write(String.valueOf(jsonForStorage));
+            file.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void readConfig(String path) {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            BufferedReader reader = new BufferedReader(new FileReader(path + osSeparator +
+                    "rootDirectory" + osSeparator + "config.json"));
+            Type storageListType = new TypeToken<ArrayList<FileStorage>>() {}.getType();
+            ArrayList<FileStorage> storageArray = gson.fromJson(reader, storageListType);
+            for (FileStorage file: storageArray) {
+                fileStorage = file;
+                if (fileStorage.getFolderRestrictions() != null)
+                    mapOfDirRestrictions = fileStorage.getFolderRestrictions();
+                System.out.println(mapOfDirRestrictions);
+            }
+            reader.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean goForward(String filename){
         if (!isStorage(getStorage().getCurrentPath()+osSeparator+filename)) {
@@ -193,38 +223,34 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
     @Override
     public void goBackwards(){
-        String currentPath= getStorage().getCurrentPath();
-
+        String currentPath = getStorage().getCurrentPath();
         String separator[] = currentPath.split(Pattern.quote(osSeparator));
-                    currentPath = "";
-                    for (int i = 0 ; i < separator.length-1 ; i++)
-                    {
-                        currentPath += separator[i];
-                        if (i != separator.length - 2) currentPath += osSeparator;
-                    }
-
-
+            currentPath = "";
+            for (int i = 0 ; i < separator.length-1 ; i++) {
+                currentPath += separator[i];
+                if (i != separator.length - 2) currentPath += osSeparator;
+            }
         getStorage().setCurrentPath(currentPath);
     }
 
     @Override
     public void moveFile(String filename, String newPath) {
         if (connectedUser.getLevel()<3) {
-                    if (newPath.contains(getStorage().getStoragePath()) &&
-                        !newPath.contains("rootDirectory")) {
-                        try {
-                            Files.move(Paths.get(getStorage().getCurrentPath() + osSeparator+filename),
-                                    Paths.get(newPath + osSeparator+filename), StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
+            if (newPath.contains(getStorage().getStoragePath()) &&
+                !newPath.contains("rootDirectory")) {
+                try {
+                    Files.move(Paths.get(getStorage().getCurrentPath() + osSeparator+filename),
+                            Paths.get(newPath + osSeparator+filename), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
 
-                        }
+                }
 
-                    } else if (newPath.contains("rootDirectory")){
-                        //System.out.println("You cannot move files to rootDirectory");
-                        //throw exception
-                    }
+            } else if (newPath.contains("rootDirectory")){
+                //System.out.println("You cannot move files to rootDirectory");
+                //throw exception
+            }
 
-        }else unauthorizedAction();
+        } else unauthorizedAction();
     }
 
     @Override
@@ -385,7 +411,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public boolean logIn(String username, String password) {
-        String path=getStorage().getStoragePath()+osSeparator+ "RootDirectory";
+        String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory";
 
         if (new File(path + osSeparator + "users.json").length() == 0) {
             createUser(username, password, 1);
@@ -404,7 +430,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 for (User user: userArray) {
                     if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                         connectedUser = new User(username, password, user.getLevel());
-                        getStorage().setCurrentPath(getStorage().getStoragePath());
+                        fileStorage.setCurrentPath(getStorage().getStoragePath());
                         return true;
 
                     }
@@ -420,8 +446,8 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public void logOut() {
         connectedUser = null;
+        writeToConfig(fileStorage, fileStorage.getFolderRestrictions());
     }
-
 
 
     @Override
@@ -441,7 +467,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public FileStorage getStorage() {
-        return storage;
+        return fileStorage;
     }
 
     public void unauthorizedAction(){

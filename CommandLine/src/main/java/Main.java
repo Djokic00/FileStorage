@@ -13,8 +13,6 @@ public class Main {
     // Djokic: sort i ls treba da vracaju niz u implementaciji -> koji ce se ispisati u komandnoj liniji!!!
 
 
-    // pitanje1: da li mi moramo da omogucimo dodavanje novih privilegija?
-    //           npr.-> superuser definise novu privilegiju broj 5
     // pitanje2: gde ce nam biti napisana lista metoda vezana za privilegije? (Koje sve moze metode da pozove
     //           korisnik sa odredjenom prvilegijom) Da li to stoji u dokumentaciji?
     // pitanje3: meni radi uploadovanje, kopiranje, downloadovanje i pomeranje fajlova. to ne radi za foldere.
@@ -26,17 +24,15 @@ public class Main {
     // pitanje5: da li posle uploadovanja currentPath setujemo na putanju skladista?
 
 
-
     //    detalj: moze a ne mora (dodati na kraju projekta ako ostane visak vremena)
     //    dati primere komandi u komandnoj liniji -> treba da bude jasno osobi koja koristi program prvi put
-    //    neka to bude ili lista primera ili neki dijalog
+    //    neka to bude ili lista primera
     //    zove se kad osoba ukuca help, dobije nazad primere kako se koriste komande
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Class localClass;
         SpecificationClass local = null;
-        boolean firstRead = true;
         String currentPath = "";
         String osSeparator = File.separator;
         Scanner input = new Scanner(System.in);
@@ -101,9 +97,10 @@ public class Main {
                     }
                 } else if (parameters[0].equals("cd")) {
                     try {
-                        if (parameters.length == 1)
+                        if (parameters.length == 1) {
                             System.out.println("Error: You must enter a name for the folder.");
-
+                            continue;
+                        }
                         if (local.goForward(parameters[1])) {
                             System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
                         } else {
@@ -271,6 +268,7 @@ public class Main {
                     }
                 } else if (parameters[0].equals("list")) {
                     System.out.println("You can only use ns, path or login command.");
+
                 } else if (parameters[0].equals("login")) {
                     //currentPath = local.getStorage().getPath();
                     System.out.println("Storage path is " + local.getStorage().getStoragePath());
@@ -278,22 +276,24 @@ public class Main {
                     String username = input.nextLine();
                     System.out.println("Password:");
                     String password = input.nextLine();
-                    if (local.logIn(username, password))
+                    if (local.logIn(username, password)) {
                         System.out.println("Connected user: " + local.getConnectedUser().getUsername()
                                 + "; Privilege: " + local.getConnectedUser().getLevel());
+                    }
+
 
                 } else if (parameters[0].equals("exit")) {
                     System.exit(0);
                 } else if (parameters[0].equals("path")) {
                     try {
-                        if (parameters.length == 1)
-                            System.out.println("Error: You must enter the path.");
+                        if (parameters.length == 1) System.out.println("Error: You must enter the path.");
                         Path pathToStorage = Paths.get(parameters[1]);
                         local = SpecificationManager.getExporter(parameters[1]);
 
                         if (Files.exists(pathToStorage) && local.isStorage(parameters[1])) {
-                            local.getStorage().setStoragePath(parameters[1]);
-                            local.getStorage().setCurrentPath(parameters[1]);
+                            local.readConfig(parameters[1]);
+                            //local.getStorage().setStoragePath(parameters[1]);
+                            //local.getStorage().setCurrentPath(parameters[1]);
 
                             String username;
                             String password;
@@ -310,8 +310,9 @@ public class Main {
                             }
 
                             boolean connected = local.logIn(username, password);
-                            if (connected == true)
+                            if (connected == true) {
                                 System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+                            }
                             else System.out.println("Not connected!");
 
                         } else if (Files.exists(pathToStorage)) {
