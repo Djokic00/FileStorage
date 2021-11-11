@@ -1,6 +1,9 @@
 import model.FileStorage;
 import model.User;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public interface SpecificationInterface {
 
@@ -22,8 +25,8 @@ public interface SpecificationInterface {
     boolean goForward(String filename);
     void goBackwards();
 
-    void listFilesFromDirectory(String... extension); // ls
-    void sort(String option, String ... name); // sort
+    List<String> listFilesFromDirectory(String... extension); // ls
+    List<String> sort(String option, String ... name); // sort
     //acs-desc; ime,datum....
 
     boolean logIn(String username, String password);

@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -10,18 +12,14 @@ public class Main {
     // /home/aleksa/Desktop/aa
     // C:\Users\estoj
 
-    // Djokic: sort i ls treba da vracaju niz u implementaciji -> koji ce se ispisati u komandnoj liniji!!!
-
 
     // pitanje2: gde ce nam biti napisana lista metoda vezana za privilegije? (Koje sve moze metode da pozove
     //           korisnik sa odredjenom prvilegijom) Da li to stoji u dokumentaciji?
-    // pitanje3: meni radi uploadovanje, kopiranje, downloadovanje i pomeranje fajlova. to ne radi za foldere.
-    //           da li treba da omogucim uploadovanje, kopiranje, downloadovanje i pomeranje celih foldera?
     // pitanje4: ako ime foldera/fajla ima vise reci, kako cemo to parsirati? da li da ime korisnik unosi pod
     //           navodnicima-> npr. cd "nov folder" ili da posle metodice stavi 2 tackice-> cd:novi folder
     // pitanje4*: kako cu pratiti koliko argumenata ima niz kad ga parsiramo ako se u imenu nalazi razmak?
     //            pitam zbog exceptiona? da ostane ovako???
-    // pitanje5: da li posle uploadovanja currentPath setujemo na putanju skladista?
+
 
 
     //    detalj: moze a ne mora (dodati na kraju projekta ako ostane visak vremena)
@@ -181,22 +179,30 @@ public class Main {
                         }
                     } else if (parameters[0].equals("ls")) {
                         try {
+                            List <String> list=new ArrayList<>();
                             if (parameters.length > 1) {
                                 for (int i = 1; i < parameters.length; i++) {
-                                    local.listFilesFromDirectory(parameters[i]);
+                                    list=local.listFilesFromDirectory(parameters[i]);
                                 }
-                            } else local.listFilesFromDirectory();
+                            } else list= local.listFilesFromDirectory();
+                            for (String l: list){
+                                System.out.println(l);
+                            }
                         } catch (Exception e) {
                             System.out.println("Too many or too few arguments.");
                         }
                     } else if (parameters[0].equals("sort")) {
                         try {
+                            List<String> listOfFiles=new ArrayList<>();
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter asc or desc.");
                             if (parameters.length == 2) {
-                                local.sort(parameters[1]);
+                                listOfFiles=local.sort(parameters[1]);
                             } else {
-                                local.sort(parameters[1], parameters[2]);
+                                listOfFiles=local.sort(parameters[1], parameters[2]);
+                            }
+                            for (String f: listOfFiles){
+                                System.out.println(f);
                             }
                         } catch (Exception e) {
                             System.out.println("Too many or too few arguments.");

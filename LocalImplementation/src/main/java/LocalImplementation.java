@@ -9,6 +9,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.*;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class LocalImplementation extends SpecificationClass implements SpecificationInterface {
@@ -20,10 +21,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     String osSeparator = File.separator;
     User connectedUser;
     FileStorage fileStorage = new FileStorage();
-
-
-    // Djokic: sort i ls treba da vracaju niz!!! config fajl!
-
 
     // treba ubaciti neki errorhandler u specifikaciju i dodati sve exceptione
 
@@ -260,22 +257,41 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         } else unauthorizedAction();
     }
 
+
     @Override
     public boolean copyFile(String filename, String newPath){
         if (connectedUser.getLevel()<3) {
-            Path newDir=Paths.get(newPath);
-            if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")){
-                try {
-                    Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), newDir.resolve(filename),
-                            StandardCopyOption.REPLACE_EXISTING);
-                    return true;
-                } catch (IOException e) {
-                    e.printStackTrace();
+            File f=new File(getStorage().getCurrentPath() + osSeparator + filename);
+            File s=new File(getStorage().getStoragePath());
+            if (fileStorage.getSize()- f.length() > 0) {
+                System.out.println(fileStorage.getSize());
+                System.out.println(f.length());
+                Path newDir = Paths.get(newPath);
+                if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")) {
+                    if (!f.isDirectory()) {
+
+                        try {
+                            Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), newDir.resolve(filename),
+                                    StandardCopyOption.REPLACE_EXISTING);
+                            fileStorage.setSize(fileStorage.getSize() - f.length());
+                            return true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            FileUtils.copyDirectory(f, new File(newPath + osSeparator + filename));
+                            fileStorage.setSize(fileStorage.getSize() - f.length());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
+
             }
             //throwException da ne moze da menja van skladista
             //throw exception ne moze rootDirectory
-           // System.out.println("nema copy van skladista ne ne ne");
+            // System.out.println("nema copy van skladista ne ne ne");
         } else unauthorizedAction();
         return false;
     }
@@ -284,7 +300,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     public boolean uploadFile(String filename){
 
         if (copyFile(filename,getStorage().getStoragePath())) {
-            // getStorage().setCurrentPath(getStorage().getStoragePath());
+            getStorage().setCurrentPath(getStorage().getStoragePath());
             return true;
         }
         return false;
@@ -293,18 +309,32 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public boolean downloadFile(String filename) {
         if (connectedUser.getLevel()<3) {
+            File f=new File(getStorage().getCurrentPath() + osSeparator + filename);
             Path downloadDir=Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
             if (!Files.exists(downloadDir)){
                 File newDir = new File(System.getProperty("user.home") + osSeparator + "StorageDownloads");
                 newDir.mkdir();
             }
-            try {
-                Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), downloadDir.resolve(filename),
-                        StandardCopyOption.REPLACE_EXISTING);
-                return true;
 
-            } catch (IOException e) {
+
+            if (!f.isDirectory()){
+
+                try {
+                    Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename),
+                            downloadDir.resolve(filename),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    return true;
+
+                } catch (IOException e) {
                     e.printStackTrace();
+                }
+            }else {
+                try {
+                    FileUtils.copyDirectory(f, new File(System.getProperty("user.home") +
+                            osSeparator + "StorageDownloads"+osSeparator+filename));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } else unauthorizedAction();
         return false;
@@ -352,44 +382,60 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void listFilesFromDirectory(String... extension) {
+    public List<String> listFilesFromDirectory(String... extension) {
+        List<String> listOfNames = new ArrayList<>();
         File file = new File(getStorage().getCurrentPath());
         File[] list = file.listFiles();
         if (list != null) {
             for (File f : list) {
-                if (extension.length == 0) System.out.println(f.getName());
+                if (extension.length == 0) listOfNames.add(f.getName());
                 else {
                     for (String extensionName : extension) {
                         if (f.getName().endsWith(extensionName))
-                            System.out.println(f.getName());
+                           // System.out.println(f.getName());
+                            listOfNames.add(f.getName());
 
                         //ovde napraviti da vraca listu
                     }
                 }
             }
         }
+        return listOfNames;
     }
 
     //sort treba da mi vraca niz kroz koji cu ja proci u komandnoj liniji i koji cu ispisati
     @Override
-    public void sort(String order, String ... option) {
+    public List<String> sort(String order, String ... option) {
+        List <String> listOfNames=new ArrayList<>();
         File file = new File(getStorage().getCurrentPath());
         File[] list = file.listFiles();
         if (option.length == 0) {
             if (order.equals("asc")) {
                 Arrays.sort(list);
+                for (File f:list){
+                    listOfNames.add(f.getName());
+                }
             }
             else if (order.equals("desc")) {
                 Arrays.sort(list, Collections.reverseOrder());
+                for (File f:list){
+                    listOfNames.add(f.getName());
+                }
             }
         }
         else {
             if (option[0].equals("date")) {
                 if (order.equals("asc")) {
                     Arrays.sort(list, Comparator.comparingLong(File::lastModified));
+                    for (File f:list){
+                        listOfNames.add(f.getName());
+                    }
                 }
                 else if (order.equals("desc")) {
                     Arrays.sort(list, Comparator.comparingLong(File::lastModified).reversed());
+                    for (File f:list){
+                        listOfNames.add(f.getName());
+                    }
                 }
             }
             else if (option[0].equals("size")) {
@@ -402,16 +448,21 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     mapOfFiles.entrySet()
                             .stream()
                             .sorted(Map.Entry.comparingByValue())
-                            .forEach(System.out::println);
+                            .forEach(entry -> {
+                                listOfNames.add(entry.getKey());
+                            });
                 }
                 else if (order.equals("desc")) {
                     mapOfFiles.entrySet()
                             .stream()
                             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                            .forEach(System.out::println);
+                            .forEach((entry -> {
+                                listOfNames.add(entry.getKey());
+                            }));
                 }
             }
         }
+        return listOfNames;
     }
 
     @Override
