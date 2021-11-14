@@ -1,6 +1,4 @@
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +8,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
@@ -20,22 +19,13 @@ import com.google.api.services.drive.model.FileList;
 import model.FileStorage;
 import model.User;
 
-public class GoogleImplementation extends SpecificationClass implements SpecificationInterface{
+public class GoogleImplementation extends SpecificationClass implements SpecificationInterface {
+    Drive service;
+    String osSeparator = java.io.File.separator;
 
     static {
         SpecificationManager.registerExporter(new GoogleImplementation());
     }
-
-    private static Drive service;
-
-    static {
-        try {
-            service = getDriveService();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     /**
      * Application name.
@@ -106,15 +96,25 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     }
 
-
     @Override
     public void createFile(String s) throws IOException {
+        service = getDriveService();
+        File fileMetadata = new File();
+        fileMetadata.setName("alo");
+        fileMetadata.setMimeType("application/vnd.google-apps.folder");
+
+        File folder = null;
+        try {
+            folder = service.files().create(fileMetadata).setFields("id").execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Folder ID: " + folder.getId());
         //done
     }
 
     @Override
     public void createDirectory(String directoryname, Integer... integers) {
-        //done
         File fileMetadata = new File();
         fileMetadata.setName(directoryname);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
@@ -170,7 +170,35 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     @Override
     public boolean downloadFile(String s) {
-        return false;
+        File fileMetadata4 = new File();
+        fileMetadata4.setName("glupost.txt");
+        java.io.File filePath4 = new java.io.File("C:\\Users\\estoj\\glupost.txt");
+        FileContent mediaContent4 = new FileContent("file/txt", filePath4);
+        File txt = null;
+        try {
+            txt = service.files().create(fileMetadata4, mediaContent4)
+                    .setFields("id")
+                    .execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        txt.setName("glupost.txt");
+        System.out.println("File ID: " + txt.getId());
+        OutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(System.getProperty("user.home") + osSeparator + "Downloads" +
+                    osSeparator + txt.getName());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            service.files().get(txt.getId()).executeMediaAndDownloadTo(outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("skinuo sam fajlic " + txt.getId());
+        return true;
     }
 
     @Override
@@ -201,37 +229,38 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     @Override
     public List<String> listFilesFromDirectory(String... extension) {
-        List<String> listOfFiles = new ArrayList<>();
-
-
-        FileList result = null;
-        try {
-            result = service.files().list()
-                    .setPageSize(10)
-                    .setFields("nextPageToken, files(id, name)")
-                    .execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        List<File> files = result.getFiles();
-        if (files == null || files.isEmpty()) {
-            System.out.println("No files found.");
-        } else {
-            //System.out.println("Files:");
-            for (File file : files) {
-                //System.out.printf("%s (%s)\n", file.getName(), file.getId());
-                if (extension.length == 0) listOfFiles.add(file.getName());
-                else {
-                    for (String extensionName : extension) {
-                        if (file.getFileExtension()== extensionName)
-                            listOfFiles.add(file.getName());
-                    }
-                }
-                listOfFiles.add(file.getName());
-            }
-            return listOfFiles;
-        }
-        return listOfFiles;
+//        List<String> listOfFiles = new ArrayList<>();
+//
+//
+//        FileList result = null;
+//        try {
+//            result = service.files().list()
+//                    .setPageSize(10)
+//                    .setFields("nextPageToken, files(id, name)")
+//                    .execute();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        List<File> files = result.getFiles();
+//        if (files == null || files.isEmpty()) {
+//            System.out.println("No files found.");
+//        } else {
+//            //System.out.println("Files:");
+//            for (File file : files) {
+//                //System.out.printf("%s (%s)\n", file.getName(), file.getId());
+//                if (extension.length == 0) listOfFiles.add(file.getName());
+//                else {
+//                    for (String extensionName : extension) {
+//                        if (file.getFileExtension()== extensionName)
+//                            listOfFiles.add(file.getName());
+//                    }
+//                }
+//                listOfFiles.add(file.getName());
+//            }
+//            return listOfFiles;
+//        }
+//        return listOfFiles;
+        return null;
     }
 
     @Override

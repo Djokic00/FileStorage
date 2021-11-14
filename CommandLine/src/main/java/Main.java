@@ -35,7 +35,7 @@ public class Main {
         String osSeparator = File.separator;
         Scanner input = new Scanner(System.in);
         String commandLine;
-        localClass = Class.forName("LocalImplementation");
+        localClass = Class.forName("GoogleImplementation");
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
 
