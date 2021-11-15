@@ -9,7 +9,7 @@ public interface SpecificationInterface {
 
     void createFile(String filename) throws IOException; // touch
     void createDirectory(String name,Integer... restriction); // mkdir
-    void createStorage(String name, String path, Long storageSize, String ... restriction); // ns
+    void createStorage(String path, Long storageSize, String ... restriction); // ns
     // mkdir name numberOfDir, mkdir -res name restriction numberOfDir
     void createListOfDirectories(String filename, Integer numberOfDirectories);
     void createListOfDirRestriction(String dirName, Integer restriction, Integer numberOfDirectories);

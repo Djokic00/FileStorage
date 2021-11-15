@@ -1,5 +1,8 @@
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import errorHandler.ErrorHandler;
+import errorHandler.ErrorImplementation;
+import errorHandler.ErrorType;
 import model.FileStorage;
 import model.User;
 import org.apache.commons.io.FileUtils;
@@ -16,13 +19,14 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     HashMap<String, Integer> mapOfDirRestrictions = new HashMap<>();
     StringBuilder jsonForUser = new StringBuilder();
     StringBuilder jsonForStorage = new StringBuilder();
-    File users;
-    File config;
+    File users, config;
     String osSeparator = File.separator;
     User connectedUser;
     FileStorage fileStorage = new FileStorage();
+    ErrorHandler errorHandler = new ErrorImplementation();
 
     // treba ubaciti neki errorhandler u specifikaciju i dodati sve exceptione
+    // komanda da vidimo koliko je skladiste
 
     static {
         SpecificationManager.registerExporter(new LocalImplementation());
@@ -31,26 +35,29 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public void createFile(String filename) throws IOException {
         if (connectedUser.getLevel() < 4) {
-            File newFile = new File(getStorage().getCurrentPath() + osSeparator + filename);
+            File newFile = new File(fileStorage.getCurrentPath() + osSeparator + filename);
 
             if (fileStorage.getRestriction() != null) {
                 if (filename.endsWith(fileStorage.getRestriction())) {
-                    System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
+                    //System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
                     return;
                 }
             }
 
             if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
-                Integer numberOfFilesLeft = mapOfDirRestrictions.get(getStorage().getCurrentPath());
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
                 if (numberOfFilesLeft > 0) {
                     newFile.createNewFile();
                     mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
                 }
-                else System.out.println("Folder is full!");
+                else {
+                    errorHandler.generateError(ErrorType.FOLDER_IS_FULL);
+                }
             } else {
                 newFile.createNewFile();
             }
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
+
     }
 
     @Override
@@ -64,41 +71,39 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
             if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
-                System.out.println(fileStorage.getCurrentPath());
+                //System.out.println(fileStorage.getCurrentPath());
                 if (numberOfFilesLeft > 0) {
                     if (fileStorage.getSize() - 4096 > 0) {
                         newDir.mkdir();
                         mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
                         fileStorage.setSize(fileStorage.getSize() - 4096);
                     }
-
+                    else errorHandler.generateError(ErrorType.STORAGE_IS_FULL);
                 }
-                else System.out.println("Folder is full!");
+                else errorHandler.generateError(ErrorType.FOLDER_IS_FULL);
             } else {
-                System.out.println(fileStorage.getCurrentPath());
                 if (fileStorage.getSize() - 4096 > 0) {
                     newDir.mkdir();
                     fileStorage.setSize(fileStorage.getSize() - 4096);
-                    System.out.println(fileStorage.getSize());
                 }
+                else errorHandler.generateError(ErrorType.STORAGE_IS_FULL);
             }
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
 
     @Override
-    public void createStorage(String name, String path, Long storageSize, String... restrictions) {
+    public void createStorage(String path, Long storageSize, String... restrictions) {
         if (restrictions.length > 0) {
             fileStorage = new FileStorage(storageSize, restrictions[0]);
         }
         else fileStorage = new FileStorage(storageSize);
 
         jsonForUser = new StringBuilder();
-        //mapOfStorageSizes.put(path, storageSize);
-        fileStorage.setStoragePath(path + osSeparator + name);
+        fileStorage.setStoragePath(path);
 
-        File storageFile = new File(getStorage().getStoragePath());
+        File storageFile = new File(path);
         storageFile.mkdir();
-        String rootDirPath = getStorage().getStoragePath() + osSeparator + "rootDirectory";
+        String rootDirPath = fileStorage.getStoragePath() + osSeparator + "rootDirectory";
         File rootDirectory = new File(rootDirPath);
         rootDirectory.mkdir();
         users = new File(rootDirectory + osSeparator + "users.json");
@@ -107,7 +112,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             users.createNewFile();
             config.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            errorHandler.generateError(ErrorType.FILE_NOT_CREATED);
         }
         fileStorage.setCurrentPath(getStorage().getStoragePath());
         writeToConfig(fileStorage);
@@ -121,28 +126,29 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             }
             if (numberOfDirectories == 0) createDirectory(dirName + '0');
 
-        }else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
     @Override
     public void createListOfDirRestriction(String dirName, Integer restriction, Integer numberOfDirectories) {
         if (connectedUser.getLevel()<4) {
-        for (int i = 0; i < numberOfDirectories; i++) {
-            createDirectory(dirName + i, restriction);
+            for (int i = 0; i < numberOfDirectories; i++) {
+                createDirectory(dirName + i, restriction);
+            }
         }
-        }else unauthorizedAction();
+        else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
 
     @Override
     public void createListOfFiles(String filename, Integer numberOfFiles) {
-        if (connectedUser.getLevel()<4) {
+        if (connectedUser.getLevel() < 4) {
             for (int i = 0; i < numberOfFiles; i++) {
                 try {
                     createFile(filename + i);
                 } catch (IOException e) {
-                    //System.out.println("Error: File not created");
+                    errorHandler.generateError(ErrorType.FILE_NOT_CREATED);
                 }
             }
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
 
     @Override
@@ -166,7 +172,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     jsonForUser.append(",");
                     jsonForUser.append(gson.toJson(user));
                     jsonForUser.append("]");
-                    //System.out.println(jsonString);
                     FileWriter file = new FileWriter(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json");
                     file.write(String.valueOf(jsonForUser));
                     file.close();
@@ -174,10 +179,12 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }  else unauthorizedAction();
+        }  else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
 
-    void writeToConfig(Object object,  HashMap<String, Integer> ... dirRestriction) {
+    // Treba dodati u Specifikaciju ?
+
+    void writeToConfig(Object object) {
         if (object instanceof FileStorage) fileStorage = (FileStorage) object;
         Gson gson = new Gson();
         String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "config.json";
@@ -207,7 +214,6 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 fileStorage = file;
                 if (fileStorage.getFolderRestrictions() != null)
                     mapOfDirRestrictions = fileStorage.getFolderRestrictions();
-                System.out.println(mapOfDirRestrictions);
             }
             reader.close();
         } catch (Exception e){
@@ -217,31 +223,30 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public boolean goForward(String filename){
-        if (!isStorage(getStorage().getCurrentPath()+osSeparator+filename)) {
-            getStorage().setCurrentPath(getStorage().getCurrentPath() + osSeparator + filename);
+        if (!isStorage(fileStorage.getCurrentPath()  + osSeparator + filename)) {
+            fileStorage.setCurrentPath(fileStorage.getCurrentPath() + osSeparator + filename);
             return true;
-        }else {
-            getStorage().setStoragePath(getStorage().getCurrentPath()+osSeparator+filename);
+        } else {
+            fileStorage.setStoragePath(fileStorage.getCurrentPath()+osSeparator+filename);
             return false;
         }
     }
     @Override
     public void goBackwards(){
-        String currentPath = getStorage().getCurrentPath();
+        String currentPath = fileStorage.getCurrentPath();
         String separator[] = currentPath.split(Pattern.quote(osSeparator));
             currentPath = "";
             for (int i = 0 ; i < separator.length-1 ; i++) {
                 currentPath += separator[i];
                 if (i != separator.length - 2) currentPath += osSeparator;
             }
-        getStorage().setCurrentPath(currentPath);
+        fileStorage.setCurrentPath(currentPath);
     }
 
     @Override
     public void moveFile(String filename, String newPath) {
         if (connectedUser.getLevel()<3) {
-            if (newPath.contains(getStorage().getStoragePath()) &&
-                !newPath.contains("rootDirectory")) {
+            if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")) {
                 try {
                     Files.move(Paths.get(getStorage().getCurrentPath() + osSeparator+filename),
                             Paths.get(newPath + osSeparator+filename), StandardCopyOption.REPLACE_EXISTING);
@@ -249,58 +254,55 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
                 }
 
-            } else if (newPath.contains("rootDirectory")){
-                //System.out.println("You cannot move files to rootDirectory");
-                //throw exception
+            } else if (newPath.contains("rootDirectory")) {
+                errorHandler.generateError(ErrorType.CANNOT_CHANGE_ROOT);
             }
-
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
 
 
     @Override
     public boolean copyFile(String filename, String newPath){
         if (connectedUser.getLevel()<3) {
-            File f=new File(getStorage().getCurrentPath() + osSeparator + filename);
-            File s=new File(getStorage().getStoragePath());
-            if (fileStorage.getSize()- f.length() > 0) {
-                System.out.println(fileStorage.getSize());
-                System.out.println(f.length());
+            File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
+            File s = new File(fileStorage.getStoragePath());
+            if (fileStorage.getSize() - file.length() > 0) {
                 Path newDir = Paths.get(newPath);
-                if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")) {
-                    if (!f.isDirectory()) {
-
+                if (newPath.contains(fileStorage.getStoragePath()) && !newPath.contains("rootDirectory")) {
+                    if (!file.isDirectory()) {
                         try {
                             Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), newDir.resolve(filename),
                                     StandardCopyOption.REPLACE_EXISTING);
-                            fileStorage.setSize(fileStorage.getSize() - f.length());
+                            fileStorage.setSize(fileStorage.getSize() - file.length());
                             return true;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     } else {
                         try {
-                            FileUtils.copyDirectory(f, new File(newPath + osSeparator + filename));
-                            fileStorage.setSize(fileStorage.getSize() - f.length());
+                            FileUtils.copyDirectory(file, new File(newPath + osSeparator + filename));
+                            fileStorage.setSize(fileStorage.getSize() - file.length());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
-                }
+                } else errorHandler.generateError(ErrorType.CANNOT_CHANGE_ROOT);
 
-            }
-            //throwException da ne moze da menja van skladista
-            //throw exception ne moze rootDirectory
-            // System.out.println("nema copy van skladista ne ne ne");
-        } else unauthorizedAction();
+            } else errorHandler.generateError(ErrorType.STORAGE_IS_FULL);
+            //throwException da ne moze da menja van skladista ???
+            //throw exception ne moze rootDirectory  - odradjeno ???
+            // throw skladiste je puno - odradjeno
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
+
         return false;
     }
 
+    // Mozda ovde neki exception
     @Override
     public boolean uploadFile(String filename){
 
-        if (copyFile(filename,getStorage().getStoragePath())) {
-            getStorage().setCurrentPath(getStorage().getStoragePath());
+        if (copyFile(filename, fileStorage.getStoragePath())) {
+            fileStorage.setCurrentPath(fileStorage.getStoragePath());
             return true;
         }
         return false;
@@ -308,17 +310,15 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public boolean downloadFile(String filename) {
-        if (connectedUser.getLevel()<3) {
-            File f=new File(getStorage().getCurrentPath() + osSeparator + filename);
-            Path downloadDir=Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
-            if (!Files.exists(downloadDir)){
+        if (connectedUser.getLevel() < 3) {
+            File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
+            Path downloadDir = Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
+
+            if (!Files.exists(downloadDir)) {
                 File newDir = new File(System.getProperty("user.home") + osSeparator + "StorageDownloads");
                 newDir.mkdir();
             }
-
-
-            if (!f.isDirectory()){
-
+            if (!file.isDirectory()) {
                 try {
                     Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename),
                             downloadDir.resolve(filename),
@@ -330,36 +330,35 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 }
             }else {
                 try {
-                    FileUtils.copyDirectory(f, new File(System.getProperty("user.home") +
-                            osSeparator + "StorageDownloads"+osSeparator+filename));
+                    FileUtils.copyDirectory(file, new File(System.getProperty("user.home") +
+                            osSeparator + "StorageDownloads" + osSeparator + filename));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
+
         return false;
     }
 
     @Override
     public void deleteFile(String filename) {
-        if (connectedUser.getLevel()<4) {
-            File file = new File(getStorage().getCurrentPath() + osSeparator + filename);
+        if (connectedUser.getLevel() < 4) {
+            File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
             if (file.isDirectory()) {
                 deleteDirectory(file);
             }
             long fileSize = file.length();
-            //System.out.println(file.getName());
             if (file.delete()) {
                 fileStorage.setSize(fileStorage.getSize() + fileSize);
-                //System.out.println(fileStorage.getSize());
             }
-          //  if (deleted == false) System.out.println("File is not in this folder.");
+            else errorHandler.generateError(ErrorType.FILE_DOES_NOT_EXISTS);
 
             if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
-                mapOfDirRestrictions.put(getStorage().getCurrentPath(), ++numberOfFilesLeft);
+                mapOfDirRestrictions.put(fileStorage.getCurrentPath(), ++numberOfFilesLeft);
             }
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
 
     }
 
@@ -371,20 +370,17 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     deleteDirectory(subfile);
                 }
                 long fileSize = subfile.length();
-                System.out.println(subfile.getName());
                 if (subfile.delete()) {
                     fileStorage.setSize(fileStorage.getSize() + fileSize);
-                    //System.out.println(fileStorage.getSize());
                 }
-
             }
-        } else unauthorizedAction();
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
     }
 
     @Override
     public List<String> listFilesFromDirectory(String... extension) {
         List<String> listOfNames = new ArrayList<>();
-        File file = new File(getStorage().getCurrentPath());
+        File file = new File(fileStorage.getCurrentPath());
         File[] list = file.listFiles();
         if (list != null) {
             for (File f : list) {
@@ -392,10 +388,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                 else {
                     for (String extensionName : extension) {
                         if (f.getName().endsWith(extensionName))
-                           // System.out.println(f.getName());
                             listOfNames.add(f.getName());
-
-                        //ovde napraviti da vraca listu
                     }
                 }
             }
@@ -403,22 +396,21 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         return listOfNames;
     }
 
-    //sort treba da mi vraca niz kroz koji cu ja proci u komandnoj liniji i koji cu ispisati
     @Override
     public List<String> sort(String order, String ... option) {
         List <String> listOfNames=new ArrayList<>();
-        File file = new File(getStorage().getCurrentPath());
+        File file = new File(fileStorage.getCurrentPath());
         File[] list = file.listFiles();
         if (option.length == 0) {
             if (order.equals("asc")) {
                 Arrays.sort(list);
-                for (File f:list){
+                for (File f: list){
                     listOfNames.add(f.getName());
                 }
             }
             else if (order.equals("desc")) {
                 Arrays.sort(list, Collections.reverseOrder());
-                for (File f:list){
+                for (File f: list){
                     listOfNames.add(f.getName());
                 }
             }
@@ -427,13 +419,13 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             if (option[0].equals("date")) {
                 if (order.equals("asc")) {
                     Arrays.sort(list, Comparator.comparingLong(File::lastModified));
-                    for (File f:list){
+                    for (File f: list){
                         listOfNames.add(f.getName());
                     }
                 }
                 else if (order.equals("desc")) {
                     Arrays.sort(list, Comparator.comparingLong(File::lastModified).reversed());
-                    for (File f:list){
+                    for (File f: list){
                         listOfNames.add(f.getName());
                     }
                 }
@@ -467,7 +459,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public void editFile(String filename) {
-        File file = new File(getStorage().getCurrentPath()+osSeparator+filename);
+        File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
         if (connectedUser.getLevel() < 4) file.setWritable(true);
         else file.setWritable(false);
 
@@ -485,9 +477,8 @@ public class LocalImplementation extends SpecificationClass implements Specifica
         if (new File(path + osSeparator + "users.json").length() == 0) {
             createUser(username, password, 1);
             connectedUser = new User(username,password,1);
-            getStorage().setCurrentPath(getStorage().getStoragePath());
+            fileStorage.setCurrentPath(fileStorage.getStoragePath());
             return true;
-
         }
         else {
             try {
@@ -505,7 +496,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     }
                 }
                 reader.close();
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -515,7 +506,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public void logOut() {
         connectedUser = null;
-        writeToConfig(fileStorage, fileStorage.getFolderRestrictions());
+        writeToConfig(fileStorage);
     }
 
 
@@ -537,9 +528,5 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public FileStorage getStorage() {
         return fileStorage;
-    }
-
-    public void unauthorizedAction(){
-        System.out.println("Unauthorized action. Level: " + connectedUser.getLevel());
     }
 }

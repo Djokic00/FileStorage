@@ -35,7 +35,8 @@ public class Main {
         String osSeparator = File.separator;
         Scanner input = new Scanner(System.in);
         String commandLine;
-        localClass = Class.forName("GoogleImplementation");
+       // localClass = Class.forName("GoogleImplementation");
+        localClass = Class.forName("LocalImplementation");
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
 
@@ -53,16 +54,13 @@ public class Main {
                     currentPath += parameters[1];
                     local = SpecificationManager.getExporter(currentPath);
                     if (local.isStorage(currentPath) == false) {
-
-                        System.out.println("Enter storage name:");
-                        String storageName = input.nextLine();
                         System.out.println("Set maximum size of the storage:");
                         Long storageSize = Long.parseLong(input.nextLine());
                         System.out.println("Set storage restriction or type n to abort:");
                         String restriction = input.nextLine();
-                        if (restriction.equals("n")) local.createStorage(storageName, currentPath, storageSize);
-                        else local.createStorage(storageName, currentPath, storageSize, restriction);
-                        System.out.println("Storage path is " + local.getStorage().getStoragePath());
+                        if (restriction.equals("n")) local.createStorage(currentPath, storageSize);
+                        else local.createStorage(currentPath, storageSize, restriction);
+                       // System.out.println("Storage path is " + local.getStorage().getStoragePath());
                         String username;
                         String password;
                         if (local.getConnectedUser() == null) {
@@ -77,7 +75,7 @@ public class Main {
                         local.logIn(username, password);
                     } else System.out.println("Your path is already a storage.");
 
-                    System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+                    //System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                 } catch (Exception e) {
                     System.out.println("Too many or too few arguments.");
                 }
@@ -332,9 +330,6 @@ public class Main {
                         System.out.println("Too many or too few arguments.");
                     }
                 }
-
             }
-
-
         }
     }

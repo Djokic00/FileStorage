@@ -1,6 +1,8 @@
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -15,13 +17,21 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import model.FileStorage;
 import model.User;
 
 public class GoogleImplementation extends SpecificationClass implements SpecificationInterface {
     Drive service;
     String osSeparator = java.io.File.separator;
+    FileStorage fileStorage = new FileStorage();
+    User connectedUser;
+    StringBuilder jsonForUser=new StringBuilder();
+    String usersid;
+    String configid;
 
     static {
         SpecificationManager.registerExporter(new GoogleImplementation());
@@ -97,20 +107,41 @@ public class GoogleImplementation extends SpecificationClass implements Specific
     }
 
     @Override
-    public void createFile(String s) throws IOException {
-        service = getDriveService();
-        File fileMetadata = new File();
-        fileMetadata.setName("alo");
-        fileMetadata.setMimeType("application/vnd.google-apps.folder");
+    public void createFile(String filename) throws IOException {
+//        service = getDriveService();
+//        File fileMetadata = new File();
+//        fileMetadata.setName(filename);
+//        fileMetadata.setMimeType("application/vnd.google-apps.folder");
+//
+//        File folder = null;
+//        try {
+//            folder = service.files().create(fileMetadata).setFields("id").execute();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("Folder ID: " + folder.getId());
 
-        File folder = null;
-        try {
-            folder = service.files().create(fileMetadata).setFields("id").execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Folder ID: " + folder.getId());
+        String folderId= fileStorage.getCurrentPath();
+        File fileMetadata2 = new File();
+        fileMetadata2.setName(filename);
+
+        //fileMetadata2.setFileExtension("txt");
+
+        fileMetadata2.setParents(Collections.singletonList(folderId));
+        // java.io.File filePath = new java.io.File("files/photo.jpg");
+        // FileContent mediaContent = new FileContent("image/jpeg", filePath);
+
+        File file = service.files().create(fileMetadata2)
+                .setFields("id, parents")
+                .execute();
+
+        System.out.println("File ID: " + file.getParents());
+        //file.setName(filename);
         //done
+        if (filename.contains("users.json"))
+            usersid=file.getId();
+        if (filename.contains("config.json"))
+            configid=file.getId();
     }
 
     @Override
@@ -118,7 +149,11 @@ public class GoogleImplementation extends SpecificationClass implements Specific
         File fileMetadata = new File();
         fileMetadata.setName(directoryname);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
+        if (fileStorage.getCurrentPath()!=null){
+            fileMetadata.setParents(Collections.singletonList(fileStorage.getCurrentPath()));
+            System.out.println("setuje parenta");
 
+        }
         File file = null;
         try {
             file = service.files().create(fileMetadata)
@@ -129,12 +164,33 @@ public class GoogleImplementation extends SpecificationClass implements Specific
         }
 
         System.out.println("Folder ID: " + file.getId());
+        if (fileStorage.getCurrentPath()==null){
+        fileStorage.setStoragePath(file.getId());
+        }
+        fileStorage.setCurrentPath(file.getId());
+
 
     }
 
     @Override
-    public void createStorage(String storagename, String s1, Long aLong, String... strings) {
-            createDirectory(storagename);
+    public void createStorage(String s, String storagename, Long aLong, String... strings) {
+        try {
+            service = getDriveService();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        createDirectory(storagename);
+            //getStorage().setCurrentPath();
+        createDirectory("rootDirectory");
+        try {
+            createFile("users.json");
+            createFile("config.json");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        fileStorage.setCurrentPath(fileStorage.getCurrentPath());
+
+
     }
 
     @Override
@@ -152,8 +208,47 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     }
 
+
     @Override
-    public void createUser(String s, String s1, Integer integer) {
+    public void createUser(String username, String password, Integer level) {
+
+//        try {
+//            File file = service.files().get(usersid).execute();
+//            java.io.File fileContent = new java.io.File("/home/aleksa/Desktop/novifajl.json");
+//            FileContent mediaContent = new FileContent(file.getMimeType(), fileContent);
+//            File updated = new File();
+//            service.files().update(file.getId(), updated, mediaContent).execute();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+
+//        try {
+//            Gson gson = new Gson();
+//            User user = new User(username, password, level);
+//            if (new File().setId(usersid).size() == 0) {
+//                FileWriter file = new FileWriter(usersid);
+//                jsonForUser.append("[");
+//                jsonForUser.append(gson.toJson(user));
+//                jsonForUser.append("]");
+//                file.write(String.valueOf(jsonForUser));
+//                file.close();
+//            }
+//            else {
+//                BufferedReader reader = new BufferedReader(new FileReader(usersid));
+//                jsonForUser = new StringBuilder(reader.readLine());
+//                jsonForUser.deleteCharAt(jsonForUser.length() - 1);
+//                jsonForUser.append(",");
+//                jsonForUser.append(gson.toJson(user));
+//                jsonForUser.append("]");
+//                //System.out.println(jsonString);
+//                FileWriter file = new FileWriter(usersid);
+//                file.write(String.valueOf(jsonForUser));
+//                file.close();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -269,8 +364,43 @@ public class GoogleImplementation extends SpecificationClass implements Specific
     }
 
     @Override
-    public boolean logIn(String s, String s1) {
-        return false;
+    public boolean logIn(String username, String password) {
+        //if (new File().get(usersid).isEmpty()) {
+        try {
+            File file = service.files().get(usersid).execute();
+            System.out.println(file.size());
+            System.out.println("Title: " + file.getName());
+            System.out.println("Description: " + file.getDescription());
+            System.out.println("MIME type: " + file.getMimeType());
+        } catch (IOException e) {
+            System.out.println("An error occurred: " + e);
+        }
+        createUser(username, password, 1);
+            connectedUser = new User(username,password,1);
+           // fileStorage.setCurrentPath(fileStorage.getStoragePath());
+            return true;
+
+ //       }
+//        else {
+//            try {
+//                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//                BufferedReader reader = new BufferedReader(new FileReader(usersid));
+//                Type userListType = new TypeToken<ArrayList<User>>() {}.getType();
+//                ArrayList<User> userArray = gson.fromJson(reader,userListType);
+//                for (User user: userArray) {
+//                    if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+//                        connectedUser = new User(username, password, user.getLevel());
+//                        //fileStorage.setCurrentPath(fileStorage.getStoragePath());
+//                        return true;
+//
+//                    }
+//                }
+//                reader.close();
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+      //  return false;
     }
 
     @Override
@@ -297,5 +427,10 @@ public class GoogleImplementation extends SpecificationClass implements Specific
     public boolean isStorage(String s) {
         return false;
     }
+
+    public void setConnectedUser(User connectedUser) {
+        this.connectedUser = connectedUser;
+    }
+
 }
 

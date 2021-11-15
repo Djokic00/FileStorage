@@ -1,3 +1,7 @@
-SpecificationInterface.class
-SpecificationClass.class
+errorHandler/ErrorImplementation$1.class
+errorHandler/ErrorImplementation.class
 SpecificationManager.class
+errorHandler/ErrorHandler.class
+SpecificationInterface.class
+errorHandler/ErrorType.class
+SpecificationClass.class
