@@ -1,3 +1,5 @@
+import Exceptions.UnauthorizedActionException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,8 +37,8 @@ public class Main {
         String osSeparator = File.separator;
         Scanner input = new Scanner(System.in);
         String commandLine;
-       // localClass = Class.forName("GoogleImplementation");
-        localClass = Class.forName("LocalImplementation");
+        localClass = Class.forName("GoogleImplementation");
+       // localClass = Class.forName("LocalImplementation");
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
 
@@ -75,7 +77,7 @@ public class Main {
                         local.logIn(username, password);
                     } else System.out.println("Your path is already a storage.");
 
-                    //System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+                    System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                 } catch (Exception e) {
                     System.out.println("Too many or too few arguments.");
                 }
@@ -113,6 +115,7 @@ public class Main {
                     }
 
                 } else if (parameters[0].equals("touch")) {
+                    System.out.println("Ucitao sam touch");
                     try {
                         if (parameters.length == 1) {
                             System.out.println("Error: You must enter a name for the file.");
@@ -123,11 +126,14 @@ public class Main {
                             local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]));
                         else {
                             local.createFile(parameters[1]);
-                            System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
+                            //System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
                         }
-                    } catch (Exception e) {
-                        System.out.println("Too many or too few arguments.");
+                    } catch (UnauthorizedActionException e){
+                        System.out.println(e.getMessage());
                     }
+//                    catch (Exception e) {
+//                        System.out.println("Too many or too few arguments.");
+//                    }
                 } else if (parameters[0].equals("mkdir")) {
                     try {
                         if (parameters.length == 1) {
@@ -243,7 +249,7 @@ public class Main {
                         try {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
-                            // String filename = parameters[1];
+                             String filename = parameters[1];
                             if (local.uploadFile(parameters[1])) {
                                 System.out.println("Upload completed: " + parameters[1]);
                             }

@@ -1,3 +1,4 @@
+import Exceptions.UnauthorizedActionException;
 import model.FileStorage;
 import model.User;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public interface SpecificationInterface {
 
-    void createFile(String filename) throws IOException; // touch
+    void createFile(String filename) throws UnauthorizedActionException,IOException; // touch
     void createDirectory(String name,Integer... restriction); // mkdir
     void createStorage(String path, Long storageSize, String ... restriction); // ns
     // mkdir name numberOfDir, mkdir -res name restriction numberOfDir

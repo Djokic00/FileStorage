@@ -1,3 +1,4 @@
+import Exceptions.UnauthorizedActionException;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import errorHandler.ErrorHandler;
@@ -33,7 +34,7 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void createFile(String filename) throws IOException {
+    public void createFile(String filename) throws UnauthorizedActionException,IOException {
         if (connectedUser.getLevel() < 4) {
             File newFile = new File(fileStorage.getCurrentPath() + osSeparator + filename);
 
@@ -56,7 +57,8 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             } else {
                 newFile.createNewFile();
             }
-        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
+        }else throw new UnauthorizedActionException();
+        //else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
 
     }
 
@@ -144,7 +146,10 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             for (int i = 0; i < numberOfFiles; i++) {
                 try {
                     createFile(filename + i);
-                } catch (IOException e) {
+                }catch (UnauthorizedActionException e){
+
+                }
+                catch (IOException e) {
                     errorHandler.generateError(ErrorType.FILE_NOT_CREATED);
                 }
             }
