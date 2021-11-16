@@ -162,8 +162,9 @@ public class LocalImplementation extends SpecificationClass implements Specifica
             try {
                 Gson gson = new Gson();
                 User user = new User(username, password, level);
-                if (new File(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json").length() == 0) {
-                    FileWriter file = new FileWriter(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json");
+                String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json";
+                if (new File(path).length() == 0) {
+                    FileWriter file = new FileWriter(path);
                     jsonForUser.append("[");
                     jsonForUser.append(gson.toJson(user));
                     jsonForUser.append("]");
@@ -171,13 +172,13 @@ public class LocalImplementation extends SpecificationClass implements Specifica
                     file.close();
                 }
                 else {
-                    BufferedReader reader = new BufferedReader(new FileReader(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json"));
+                    BufferedReader reader = new BufferedReader(new FileReader(path));
                     jsonForUser = new StringBuilder(reader.readLine());
                     jsonForUser.deleteCharAt(jsonForUser.length() - 1);
                     jsonForUser.append(",");
                     jsonForUser.append(gson.toJson(user));
                     jsonForUser.append("]");
-                    FileWriter file = new FileWriter(getStorage().getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json");
+                    FileWriter file = new FileWriter(path);
                     file.write(String.valueOf(jsonForUser));
                     file.close();
                 }

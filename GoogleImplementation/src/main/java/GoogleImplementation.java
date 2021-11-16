@@ -49,8 +49,9 @@ public class GoogleImplementation extends SpecificationClass implements Specific
     FileStorage fileStorage = new FileStorage();
     User connectedUser;
     StringBuilder jsonForUser=new StringBuilder();
-    String usersid;
-    String configid;
+    String usersId;
+    String configId;
+    int num = 0;
 
     static {
         SpecificationManager.registerExporter(new GoogleImplementation());
@@ -160,9 +161,9 @@ public class GoogleImplementation extends SpecificationClass implements Specific
             file.setName(filename);
             //done
             if (filename.contains("users.json"))
-                usersid = file.getId();
+                usersId = file.getId();
             if (filename.contains("config.json"))
-                configid = file.getId();
+                configId = file.getId();
 
             System.out.println("kraj metode");
         } else System.out.println("vec postoji");
@@ -264,22 +265,20 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     @Override
     public void createListOfFiles(String filename, Integer numberOfFiles) {
-
-                for (int i = 0; i < numberOfFiles; i++) {
-                    try {
-                        createFile(filename + i);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
+        for (int i = 0; i < numberOfFiles; i++) {
+            try {
+                createFile(filename + i);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
     @Override
     public void createUser(String username, String password, Integer level) {
 
-        try {
+ //       try {
 
 //            Path downloadDir = Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
 //
@@ -289,52 +288,71 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 //                newDir.mkdir();
 //            }
 
-            File file = service.files().get(usersid).execute();
-            if (file.size()>=8) downloadFile("users.json");
-
-                java.io.File fileContent = new java.io.File(System.getProperty("user.home") + osSeparator + "StorageDownloads" + osSeparator + "users.json");
-                FileContent mediaContent = new FileContent(file.getMimeType(), fileContent);
-                File updated = new File();
-                service.files().update(file.getId(), updated, mediaContent).execute();
-                System.out.println("updated");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
 //        try {
-//            Gson gson = new Gson();
-//            User user = new User(username, password, level);
-//            if (new File().setId(usersid).size() == 0) {
-//                FileWriter file = new FileWriter(usersid);
-//                jsonForUser.append("[");
-//                jsonForUser.append(gson.toJson(user));
-//                jsonForUser.append("]");
-//                file.write(String.valueOf(jsonForUser));
-//                file.close();
-//            }
-//            else {
-//                BufferedReader reader = new BufferedReader(new FileReader(usersid));
-//                jsonForUser = new StringBuilder(reader.readLine());
-//                jsonForUser.deleteCharAt(jsonForUser.length() - 1);
-//                jsonForUser.append(",");
-//                jsonForUser.append(gson.toJson(user));
-//                jsonForUser.append("]");
-//                //System.out.println(jsonString);
-//                FileWriter file = new FileWriter(usersid);
-//                file.write(String.valueOf(jsonForUser));
-//                file.close();
-//            }
-//        } catch (IOException e) {
+//            File file = service.files().get(usersid).execute();
+//            java.io.File fileContent = new java.io.File("/home/aleksa/Desktop/novifajl.json");
+//            FileContent mediaContent = new FileContent(file.getMimeType(), fileContent);
+//            File updated = new File();
+//            service.files().update(file.getId(), updated, mediaContent).execute();
+//        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-        System.out.println("kraj metode");
+
+//            File file = service.files().get(usersid).execute();
+////            if (file.size()>=8) downloadFile("users.json");
+//
+//                java.io.File fileContent = new java.io.File(System.getProperty("user.home") + osSeparator + "StorageDownloads" + osSeparator + "users.json");
+//                FileContent mediaContent = new FileContent(file.getMimeType(), fileContent);
+//                File updated = new File();
+//                service.files().update(file.getId(), updated, mediaContent).execute();
+//                System.out.println("updated");
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+
+        if ((connectedUser == null) || connectedUser.getLevel() == 1) {
+            try {
+                File file = service.files().get(usersId).execute();
+                Gson gson = new Gson();
+                User user = new User(username, password, level);
+                String path = System.getProperty("user.home") + osSeparator + "users.json";
+                //java.io.File newFile = new java.io.File(path);
+                if (new java.io.File(path).length() == 0) {
+                    System.out.println("Ulazi ovde");
+                    FileWriter fileWriter = new FileWriter(path);
+                    jsonForUser.append("[");
+                    jsonForUser.append(gson.toJson(user));
+                    jsonForUser.append("]");
+                    fileWriter.write(String.valueOf(jsonForUser));
+                    fileWriter.close();
+                }
+                else {
+                    BufferedReader reader = new BufferedReader(new FileReader(path));
+                    jsonForUser = new StringBuilder(reader.readLine());
+                    jsonForUser.deleteCharAt(jsonForUser.length() - 1);
+                    jsonForUser.append(",");
+                    jsonForUser.append(gson.toJson(user));
+                    jsonForUser.append("]");
+                    FileWriter fileWriter = new FileWriter(path);
+                    fileWriter.write(String.valueOf(jsonForUser));
+                    fileWriter.close();
+                }
+                FileContent mediaContent = new FileContent(file.getMimeType(), new java.io.File(path));
+                File updated = new File();
+                service.files().update(file.getId(), updated, mediaContent).execute();
+                //newFile.delete();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void moveFile(String filename, String newPath) {
-                String fileId = getIdByName(filename);
+        String fileId = getIdByName(filename);
         String folderId =getIdByName(newPath);
 // Retrieve the existing parents to remove
         File file = null;
@@ -375,41 +393,52 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     @Override
     public boolean downloadFile(String filename) {
-        String fileId = getIdByName(filename);
+        String fileId = "";
+        if (filename.equals("users.json")) fileId = usersId;
+        else if (filename.equals("config.json")) fileId = configId;
+        else fileId = getIdByName(filename);
 
-
-        System.out.println(fileId);
         try {
-            File file = service.files().get(usersid).execute();
-            System.out.println(file.size());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        Path downloadDir = Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
-
-        if (!Files.exists(downloadDir)) {
-            java.io.File newDir = new java.io.File(System.getProperty("user.home") + osSeparator + "StorageDownloads");
-            System.out.println("napravio sam storageDownloads");
-            newDir.mkdir();
-        }
-        OutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(System.getProperty("user.home") + osSeparator + "StorageDownloads" +
-                    osSeparator + filename);
-        } catch (FileNotFoundException e) {
-            System.out.println("ovde pucam");
-        }
-        try {
+            service.files().get(fileId).execute();
+            OutputStream outputStream = new FileOutputStream(System.getProperty("user.home") + osSeparator + filename);
             service.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+            outputStream.close();
         } catch (IOException e) {
-            System.out.println("Fajl je 0, zato puca. Mora da ima barem 1 bajt");
             e.printStackTrace();
         }
 
-        System.out.println("skinuo sam fajlic " + fileId);
-        System.out.println("kraj metode");
+//        try {
+//
+//
+//        } catch (IOException e) {
+//            //System.out.println("Fajl je 0, zato puca. Mora da ima barem 1 bajt");
+//            e.printStackTrace();
+//        }
+
+//
+//        Path downloadDir = Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
+//
+//        if (!Files.exists(downloadDir)) {
+//            java.io.File newDir = new java.io.File(System.getProperty("user.home") + osSeparator + "StorageDownloads");
+//            System.out.println("napravio sam storageDownloads");
+//            newDir.mkdir();
+//        }
+//        OutputStream outputStream = null;
+//        try {
+//            outputStream = new FileOutputStream(System.getProperty("user.home") + osSeparator + "StorageDownloads" +
+//                    osSeparator + filename);
+//        } catch (FileNotFoundException e) {
+//            System.out.println("ovde pucam");
+//        }
+//        try {
+//            service.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+//        } catch (IOException e) {
+//            System.out.println("Fajl je 0, zato puca. Mora da ima barem 1 bajt");
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println("skinuo sam fajlic " + fileId);
+//        System.out.println("kraj metode");
         return true;
     }
 
@@ -488,7 +517,7 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     @Override
     public void deleteFile(String filename) {
-        String fileId=getIdByName(filename);
+        String fileId = getIdByName(filename);
         try {
             service.files().delete(fileId).execute();
             System.out.println("obrisao sam " + filename);
@@ -501,7 +530,7 @@ public class GoogleImplementation extends SpecificationClass implements Specific
 
     @Override
     public boolean goForward(String filename) {
-        String fileId=getIdByName(filename);
+        String fileId = getIdByName(filename);
         fileStorage.setCurrentPath(fileId);
 
         return true;
@@ -557,45 +586,40 @@ public class GoogleImplementation extends SpecificationClass implements Specific
         return null;
     }
 
+    // Treba raditi download svaki put kad se radi login
+    // time i path pokrivamo - da sa drugog skladista prvo skine users.json ali problem je ako je
+    // fajl prazan - mozda ubaciti globalnu i onda setovati na 1 posle prvog logina a vratiti na 0 posle
+    // logout-a? To je jedino sto mi pada na pamet da ce raditi sigurno
+
     @Override
     public boolean logIn(String username, String password) {
-        //if (new File().get(usersid).isEmpty()) {
-        try {
-            File file = service.files().get(usersid).execute();
-            System.out.println(file.size());
-            System.out.println("Title: " + file.getName());
-            System.out.println("Description: " + file.getDescription());
-            System.out.println("MIME type: " + file.getMimeType());
-        } catch (IOException e) {
-            System.out.println("An error occurred: " + e);
+        //if (connectedUser != null)
+        downloadFile("users.json");
+        String path = System.getProperty("user.home") + osSeparator + "users.json";
+        if (new java.io.File(path).length() == 0) {
+            createUser(username, password, 1);
+            connectedUser = new User(username, password, 1);
+        } else {
+            try {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                BufferedReader reader = new BufferedReader(new FileReader(path));
+                Type userListType = new TypeToken<ArrayList<User>>() {}.getType();
+                ArrayList<User> userArray = gson.fromJson(reader, userListType);
+                for (User user : userArray) {
+                    if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+                        connectedUser = new User(username, password, user.getLevel());
+                        //fileStorage.setCurrentPath(fileStorage.getStoragePath());
+                        return true;
+                    }
+                }
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // fileStorage.setCurrentPath(fileStorage.getStoragePath());
+            System.out.println("kraj metode login");
         }
-        createUser(username, password, 1);
-            connectedUser = new User(username,password,1);
-           // fileStorage.setCurrentPath(fileStorage.getStoragePath());
-        System.out.println("kraj metode login");
-            return true;
-
- //       }
-//        else {
-//            try {
-//                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//                BufferedReader reader = new BufferedReader(new FileReader(usersid));
-//                Type userListType = new TypeToken<ArrayList<User>>() {}.getType();
-//                ArrayList<User> userArray = gson.fromJson(reader,userListType);
-//                for (User user: userArray) {
-//                    if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-//                        connectedUser = new User(username, password, user.getLevel());
-//                        //fileStorage.setCurrentPath(fileStorage.getStoragePath());
-//                        return true;
-//
-//                    }
-//                }
-//                reader.close();
-//            } catch (Exception e){
-//                e.printStackTrace();
-//            }
-//        }
-      //  return false;
+        return true; // treba false
     }
 
     @Override

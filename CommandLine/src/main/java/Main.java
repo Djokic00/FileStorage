@@ -197,7 +197,7 @@ public class Main {
                         }
                     } else if (parameters[0].equals("sort")) {
                         try {
-                            List<String> listOfFiles=new ArrayList<>();
+                            List<String> listOfFiles;
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter asc or desc.");
                             if (parameters.length == 2) {
