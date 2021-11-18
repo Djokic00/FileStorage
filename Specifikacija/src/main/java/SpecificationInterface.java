@@ -36,4 +36,5 @@ public interface SpecificationInterface {
     FileStorage getStorage();
     void readConfig(String path);
     boolean isStorage(String path);
+    void writeToJsonFile(String filename, Object object);
 }

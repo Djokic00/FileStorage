@@ -38,7 +38,7 @@ public class Main {
         Scanner input = new Scanner(System.in);
         String commandLine;
         localClass = Class.forName("GoogleImplementation");
-       // localClass = Class.forName("LocalImplementation");
+       //localClass = Class.forName("LocalImplementation");
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
 
@@ -299,14 +299,17 @@ public class Main {
                 } else if (parameters[0].equals("path")) {
                     try {
                         if (parameters.length == 1) System.out.println("Error: You must enter the path.");
-                        Path pathToStorage = Paths.get(parameters[1]);
+                        //currentPath=parameters[1];
+
                         local = SpecificationManager.getExporter(parameters[1]);
 
-                        if (Files.exists(pathToStorage) && local.isStorage(parameters[1])) {
-                            local.readConfig(parameters[1]);
+//////////////////////////////metoda existsStorage()
+//                        if (Files.exists(pathToStorage) && local.isStorage(parameters[1])) {
+//                            local.readConfig(parameters[1]);
                             //local.getStorage().setStoragePath(parameters[1]);
                             //local.getStorage().setCurrentPath(parameters[1]);
-
+                        if (local.isStorage(parameters[1])==true){
+                            local.readConfig(parameters[1]);
                             String username;
                             String password;
                             if (local.getConnectedUser() == null) {
@@ -327,11 +330,12 @@ public class Main {
                             }
                             else System.out.println("Not connected!");
 
-                        } else if (Files.exists(pathToStorage)) {
-                            System.out.println("Error: not a storage");
-                        } else if (Files.exists(pathToStorage) == false) {
-                            System.out.println("Incorrect path or command!");
-                        } else if (parameters[0].equals("exit")) System.exit(0);
+                        }
+//                        else if (Files.exists(pathToStorage)) {
+//                            System.out.println("Error: not a storage");
+//                        } else if (Files.exists(pathToStorage) == false) {
+//                            System.out.println("Incorrect path or command!");}
+                        else if (parameters[0].equals("exit")) System.exit(0);
                     } catch (Exception e) {
                         System.out.println("Too many or too few arguments.");
                     }

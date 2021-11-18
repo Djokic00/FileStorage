@@ -4,15 +4,21 @@ import java.io.File;
 import java.util.HashMap;
 
 public class FileStorage {
-    Boolean connection = false;
+   // Boolean connection = false;
     String restriction;
     String storagePath;
     String currentPath;
     Long size;
+    String storagename;
     HashMap<String, Integer> folderRestrictions;
 
     public FileStorage(Long size) {
         this.size = size;
+    }
+
+    public FileStorage(String storagePath, String storagename) {
+        this.storagePath = storagePath;
+        this.storagename = storagename;
     }
 
     public FileStorage(Long size, String restriction) {
@@ -44,13 +50,13 @@ public class FileStorage {
         this.restriction = restriction;
     }
 
-    public Boolean getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Boolean connection) {
-        this.connection = connection;
-    }
+//    public Boolean getConnection() {
+//        return connection;
+//    }
+//
+//    public void setConnection(Boolean connection) {
+//        this.connection = connection;
+//    }
 
     public String getStoragePath() {
         return storagePath;
@@ -74,5 +80,13 @@ public class FileStorage {
 
     public void setSize(Long size) {
         this.size = size;
+    }
+
+    public String getStoragename() {
+        return storagename;
+    }
+
+    public void setStoragename(String storagename) {
+        this.storagename = storagename;
     }
 }

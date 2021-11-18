@@ -478,12 +478,14 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
     @Override
     public boolean logIn(String username, String password) {
+
         String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory";
 
         if (new File(path + osSeparator + "users.json").length() == 0) {
             createUser(username, password, 1);
             connectedUser = new User(username,password,1);
             fileStorage.setCurrentPath(fileStorage.getStoragePath());
+
             return true;
         }
         else {
@@ -517,14 +519,27 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
 
     @Override
-    public boolean isStorage(String currentPath) {
-        String users = currentPath + osSeparator + "rootDirectory" + osSeparator + "users.json";
-        String config = currentPath + osSeparator + "rootDirectory" + osSeparator + "config.json";
-        Path pathToUsers = Paths.get(users);
-        Path pathToConfig = Paths.get(config);
-        if (Files.exists(pathToUsers) && Files.exists(pathToConfig)) return true;
-        else return false;
+    public boolean isStorage(String path) {
+        Path pathToStorage = Paths.get(path);
+
+        if (Files.exists(pathToStorage)) {
+            String users = path + osSeparator + "rootDirectory" + osSeparator + "users.json";
+            String config = path + osSeparator + "rootDirectory" + osSeparator + "config.json";
+            Path pathToUsers = Paths.get(users);
+            Path pathToConfig = Paths.get(config);
+            if (Files.exists(pathToUsers) && Files.exists(pathToConfig)) return true;
+
+        }
+
+        return false;
     }
+
+    @Override
+    public void writeToJsonFile(String s, Object o) {
+
+    }
+
+
 
     @Override
     public User getConnectedUser() {
