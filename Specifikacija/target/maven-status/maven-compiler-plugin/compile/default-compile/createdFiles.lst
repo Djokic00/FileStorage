@@ -1,12 +1,3 @@
-Exceptions\StorageFullException.class
-Exceptions\FileNotCreatedException.class
 SpecificationManager.class
-Exceptions\FileDoesntExistException.class
 SpecificationInterface.class
 SpecificationClass.class
-Exceptions\FolderFullException.class
-Exceptions\ForbiddenExtensionException.class
-Exceptions\UnauthorizedActionException.class
-Exceptions\NotConnectedException.class
-Exceptions\NotStorageException.class
-Exceptions\CantChangeRootdirException.class

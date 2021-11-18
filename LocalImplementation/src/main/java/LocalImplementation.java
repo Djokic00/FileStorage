@@ -96,9 +96,9 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public void createStorage(String path, Long storageSize, String... restrictions) {
         if (restrictions.length > 0) {
-            fileStorage = new FileStorage(storageSize, restrictions[0]);
+            fileStorage = new FileStorage(path, storageSize, restrictions[0]); // TREBA POPRAVITI ZBOG KONSTRUKTORA
         }
-        else fileStorage = new FileStorage(storageSize);
+        else fileStorage = new FileStorage(path, storageSize); // TREBA POPRAVITI ZBOG KONSTRUKTORA
 
         jsonForUser = new StringBuilder();
         fileStorage.setStoragePath(path);

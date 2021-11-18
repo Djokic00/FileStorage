@@ -4,29 +4,27 @@ import java.io.File;
 import java.util.HashMap;
 
 public class FileStorage {
-   // Boolean connection = false;
     String restriction;
     String storagePath;
     String currentPath;
     Long size;
-    String storagename;
+    String storageName;
     HashMap<String, Integer> folderRestrictions;
 
-    public FileStorage(Long size) {
+    public FileStorage(String storageName, Long size) {
+        this.storageName = storageName;
         this.size = size;
     }
 
-    public FileStorage(String storagePath, String storagename) {
-        this.storagePath = storagePath;
-        this.storagename = storagename;
-    }
 
-    public FileStorage(Long size, String restriction) {
+    public FileStorage(String storageName, Long size, String restriction) {
+        this.storageName = storageName;
         this.size = size;
         this.restriction = restriction;
     }
 
-    public FileStorage(Long size, String restriction, HashMap<String, Integer> folderRestrictions) {
+    public FileStorage(String storageName, Long size, String restriction, HashMap<String, Integer> folderRestrictions) {
+        this.storageName = storageName;
         this.size = size;
         this.restriction = restriction;
         this.folderRestrictions = folderRestrictions;
@@ -49,14 +47,6 @@ public class FileStorage {
     public void setRestriction(String restriction) {
         this.restriction = restriction;
     }
-
-//    public Boolean getConnection() {
-//        return connection;
-//    }
-//
-//    public void setConnection(Boolean connection) {
-//        this.connection = connection;
-//    }
 
     public String getStoragePath() {
         return storagePath;
@@ -82,11 +72,12 @@ public class FileStorage {
         this.size = size;
     }
 
-    public String getStoragename() {
-        return storagename;
+    public String getStorageName() {
+        return storageName;
     }
 
-    public void setStoragename(String storagename) {
-        this.storagename = storagename;
+    public void setStorageName(String storageName) {
+        this.storageName = storageName;
     }
+
 }

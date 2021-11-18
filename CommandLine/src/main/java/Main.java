@@ -19,16 +19,9 @@ public class Main {
     //           korisnik sa odredjenom prvilegijom) Da li to stoji u dokumentaciji?
     // pitanje4: ako ime foldera/fajla ima vise reci, kako cemo to parsirati? da li da ime korisnik unosi pod
     //           navodnicima-> npr. cd "nov folder" ili da posle metodice stavi 2 tackice-> cd:novi folder
-    // pitanje4*: kako cu pratiti koliko argumenata ima niz kad ga parsiramo ako se u imenu nalazi razmak?
+    // pitanje5: kako cu pratiti koliko argumenata ima niz kad ga parsiramo ako se u imenu nalazi razmak?
+    //          - Surla rekla da ne mora razmak da se hendluje
     //            pitam zbog exceptiona? da ostane ovako???
-
-
-
-    //    detalj: moze a ne mora (dodati na kraju projekta ako ostane visak vremena)
-    //    dati primere komandi u komandnoj liniji -> treba da bude jasno osobi koja koristi program prvi put
-    //    neka to bude ili lista primera
-    //    zove se kad osoba ukuca help, dobije nazad primere kako se koriste komande
-
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Class localClass;
@@ -47,7 +40,6 @@ public class Main {
             commandLine = input.nextLine();
             String parameters[] = commandLine.split(" ");
             local = SpecificationManager.getExporter("");
-
             if (parameters[0].equals("ns")) {
                 try {
                     if (parameters.length == 1)
@@ -74,10 +66,12 @@ public class Main {
                             username = local.getConnectedUser().getUsername();
                             password = local.getConnectedUser().getPassword();
                         }
-                        local.logIn(username, password);
+                        if (local.logIn(username, password)) {
+                            System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+                        } else System.out.println("Not connected");
                     } else System.out.println("Your path is already a storage.");
 
-                    System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+
                 } catch (Exception e) {
                     System.out.println("Too many or too few arguments.");
                 }
@@ -126,7 +120,6 @@ public class Main {
                             local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]));
                         else {
                             local.createFile(parameters[1]);
-                            //System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
                         }
                     } catch (UnauthorizedActionException e){
                         System.out.println(e.getMessage());
@@ -237,7 +230,6 @@ public class Main {
                         try {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
-                            //String filename = parameters[1];
                             if (local.downloadFile(parameters[1])) {
                                 System.out.println("Download completed: " + parameters[1]);
                             }
@@ -249,7 +241,6 @@ public class Main {
                         try {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
-                             String filename = parameters[1];
                             if (local.uploadFile(parameters[1])) {
                                 System.out.println("Upload completed: " + parameters[1]);
                             }
@@ -293,7 +284,6 @@ public class Main {
                                 + "; Privilege: " + local.getConnectedUser().getLevel());
                     }
 
-
                 } else if (parameters[0].equals("exit")) {
                     System.exit(0);
                 } else if (parameters[0].equals("path")) {
@@ -303,12 +293,12 @@ public class Main {
 
                         local = SpecificationManager.getExporter(parameters[1]);
 
-//////////////////////////////metoda existsStorage()
+//                        metoda existsStorage()
 //                        if (Files.exists(pathToStorage) && local.isStorage(parameters[1])) {
 //                            local.readConfig(parameters[1]);
-                            //local.getStorage().setStoragePath(parameters[1]);
-                            //local.getStorage().setCurrentPath(parameters[1]);
-                        if (local.isStorage(parameters[1])==true){
+//                            local.getStorage().setStoragePath(parameters[1]);
+//                            local.getStorage().setCurrentPath(parameters[1]);
+                        if (local.isStorage(parameters[1]) == true){
                             local.readConfig(parameters[1]);
                             String username;
                             String password;
@@ -338,6 +328,7 @@ public class Main {
                         else if (parameters[0].equals("exit")) System.exit(0);
                     } catch (Exception e) {
                         System.out.println("Too many or too few arguments.");
+                        e.printStackTrace();
                     }
                 }
             }
