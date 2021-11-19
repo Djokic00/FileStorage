@@ -134,72 +134,112 @@ public class GoogleImplementation extends SpecificationClass {
 
     @Override
     public void createFile(String filename) throws IOException {
-//        if (filename.contains(fileStorage.getRestriction())) {
-//            System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
-//            return;
-//        }
-
+        if (fileStorage.getRestriction() != null && filename.contains(fileStorage.getRestriction())) {
+            System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
+            return;
+        }
+        File file;
         if (!compareNames(filename)) {
             String folderId = fileStorage.getCurrentPath();
             File fileMetadata = new File();
             fileMetadata.setName(filename);
             fileMetadata.setParents(Collections.singletonList(folderId));
-            File file = service.files().create(fileMetadata).setFields("id, parents").execute();
-            System.out.println("File ID: " + file.getParents());
-            file.setName(filename);
+            if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
+                if (numberOfFilesLeft > 0) {
+                    try {
+                        service.files().create(fileMetadata).setFields("id").execute();
+                        mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            else {
+                file = service.files().create(fileMetadata).setFields("id, parents").execute();
+                System.out.println("File ID: " + file.getParents());
+                file.setName(filename);
+                if (filename.contains("users.json")) usersId = file.getId();
+                if (filename.contains("config.json")) configId = file.getId();
+                if (filename.contains("storage.json")) storageJsonId = file.getId();
+            }
 
             //fileMetadata2.setFileExtension("txt");
             // java.io.File filePath = new java.io.File("files/photo.jpg");
             // FileContent mediaContent = new FileContent("image/jpeg", filePath);
 
-            if (filename.contains("users.json")) usersId = file.getId();
-            if (filename.contains("config.json")) configId = file.getId();
-            if (filename.contains("storage.json")) storageJsonId = file.getId();
-
         } else System.out.println("File with such name already exists");
     }
+
+//    void solve(Integer restriction) {
+//        File fileMetadata = new File();
+//        fileMetadata.setName(directoryName);
+//        fileMetadata.setMimeType("application/vnd.google-apps.folder");
+//        if (fileStorage.getCurrentPath() != null) {
+//            fileMetadata.setParents(Collections.singletonList(fileStorage.getCurrentPath()));
+//            System.out.println("setuje parenta " + fileStorage.getCurrentPath());
+//        }
+//        File file = null;
+//        file = service.files().create(fileMetadata).setFields("id").execute();
+//        mapOfDirRestrictions.put(fileId, restriction[0]);
+//        fileStorage.setFolderRestrictions(mapOfDirRestrictions);
+//    }
 
     @Override
     public void createDirectory(String directoryName, Integer... restriction) {
         if (!compareNames(directoryName)) {
-            if (restriction.length > 0) {
-                mapOfDirRestrictions.put(fileStorage.getCurrentPath(), restriction[0]);
-                fileStorage.setFolderRestrictions(mapOfDirRestrictions);
-            }
             File fileMetadata = new File();
             fileMetadata.setName(directoryName);
             fileMetadata.setMimeType("application/vnd.google-apps.folder");
             if (fileStorage.getCurrentPath() != null) {
                 fileMetadata.setParents(Collections.singletonList(fileStorage.getCurrentPath()));
-                System.out.println("setuje parenta " + fileStorage.getCurrentPath());
             }
             File file = null;
-//            if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
-//                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
-//                if (numberOfFilesLeft > 0) {
-//                    if (fileStorage.getSize() - 4096 > 0) {
-//                        try {
-//                            file = service.files().create(fileMetadata).setFields("id").execute();
-//                            mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
-//                            fileStorage.setSize(fileStorage.getSize() - 4096);
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            }
-//            else {
-                //if (fileStorage.getSize() - 4096 > 0) {
+            if (restriction.length > 0) {
+                try {
+                    file = service.files().create(fileMetadata).setFields("id").execute();
+                    mapOfDirRestrictions.put(file.getId(), restriction[0]);
+                    fileStorage.setFolderRestrictions(mapOfDirRestrictions);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if (fileStorage.getStoragePath() != null && mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
+                System.out.println("Ulazi");
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
+                if (numberOfFilesLeft > 0) {
+                    if (fileStorage.getSize() - 4096 > 0) {
+                        try {
+                            file = service.files().create(fileMetadata).setFields("id").execute();
+                            mapOfDirRestrictions.put(fileStorage.getCurrentPath(), --numberOfFilesLeft);
+                            fileStorage.setSize(fileStorage.getSize() - 4096);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            else {
+                if (fileStorage.getStoragePath() == null || directoryName.equals("rootDirectory")) {
                     try {
                         file = service.files().create(fileMetadata).setFields("id").execute();
-                        //fileStorage.setSize(fileStorage.getSize() - 4096);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-               // }
-//            }
+                }
+                else if (fileStorage.getSize() - 4096 > 0) {
+                    try {
+                        file = service.files().create(fileMetadata).setFields("id").execute();
+                        fileStorage.setSize(fileStorage.getSize() - 4096);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+               } else {
+                    System.out.println("Storage is full");
+                    return;
+                }
+            }
 
-            System.out.println("Folder ID: " + file.getId());
             if (fileStorage.getStoragePath() == null) {
                 fileStorage.setStoragePath(file.getId());
                 fileStorage.setCurrentPath(file.getId());
@@ -418,9 +458,18 @@ public class GoogleImplementation extends SpecificationClass {
     @Override
     public void deleteFile(String filename) {
         String fileId = getIdByName(filename);
+        File file = null;
         try {
+            file = service.files().get(fileId).setFields("id, name, mimeType").execute();
+            if (file.getMimeType().contains("folder")) {
+                fileStorage.setSize(fileStorage.getSize() + 4096);
+            }
             service.files().delete(fileId).execute();
-            System.out.println("obrisao sam " + filename);
+            if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
+                Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
+                mapOfDirRestrictions.put(fileStorage.getCurrentPath(), ++numberOfFilesLeft);
+            }
+            System.out.println("File " + filename + " deleted");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -571,8 +620,6 @@ public class GoogleImplementation extends SpecificationClass {
             return listOfNames;
     }
 
-
-
     @Override
     public boolean logIn(String username, String password) {
         if (usersEmpty == false) downloadFile("users.json");
@@ -609,6 +656,7 @@ public class GoogleImplementation extends SpecificationClass {
 
     @Override
     public void logOut() {
+        writeToConfig(fileStorage);
         connectedUser = null;
         usersEmpty = true;
         fileStorage.setCurrentPath(null);
@@ -684,30 +732,32 @@ public class GoogleImplementation extends SpecificationClass {
             e.printStackTrace();
         }
 
-        checkStorageJson();
+        if (!checkStorageJson()) return false;
            try {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 BufferedReader reader = new BufferedReader(new FileReader(
                         System.getProperty("user.home") + osSeparator + "storage.json"));
                 Type storageListType = new TypeToken<ArrayList<StorageJson>>() {}.getType();
                 ArrayList<StorageJson> userArray = gson.fromJson(reader, storageListType);
-                for (StorageJson fs: userArray) {
-                    if (fs.getStorageName().equals(storageName)) {
-                        usersId = fs.getUserId();
-                        configId = fs.getConfigId();
-                        // znaci kad imamo storage lokalno i radimo ns necemo praviti novi storage.json jer storageJsonId nije null
-                        // i takodje necemo prolaziti kroz sve foldere na drajvu da vidimo njegov id
-                        usersEmpty = false;
-                        fileStorage.setCurrentPath(fs.getStorageId());
-                        return true;
+                if (!userArray.isEmpty()) {
+                    for (StorageJson fs: userArray) {
+                        if (fs.getStorageName().equals(storageName)) {
+                            usersId = fs.getUserId();
+                            configId = fs.getConfigId();
+                            // znaci kad imamo storage lokalno i radimo ns necemo praviti novi storage.json jer storageJsonId nije null
+                            // i takodje necemo prolaziti kroz sve foldere na drajvu da vidimo njegov id
+                            usersEmpty = false;
+                            fileStorage.setCurrentPath(fs.getStorageId());
+                            return true;
+                        }
+                        storageJsonId = fs.getStorageJsonId();
                     }
-                    storageJsonId = fs.getStorageJsonId();
                 }
+
             reader.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        System.out.println("ne postoji storage.json");
 
         return false;
     }
@@ -826,7 +876,6 @@ public class GoogleImplementation extends SpecificationClass {
         }
         return fileId;
     }
-
 
 
     public String getParentId(){
@@ -992,7 +1041,7 @@ public class GoogleImplementation extends SpecificationClass {
             ArrayList<FileStorage> userArray = gson.fromJson(reader,storageListType);
             for (FileStorage fs: userArray) {
                 if (fs.getStorageName().equals(storagename)) {
-                    System.out.println(storagename);
+                    //System.out.println(storagename);
                     return fs.getStoragePath();
                 }
             }
@@ -1003,19 +1052,17 @@ public class GoogleImplementation extends SpecificationClass {
         return null;
     }
 
-    void checkStorageJson() {
+    boolean checkStorageJson() {
         String fileID = compareNamesToJson("storage.json");
         if (fileID != "") downloadFile("storage.json");
         else {
             try {
                 createFile("storage.json");
+                return false;
             } catch (IOException e) {
-
             }
         }
-
+        return true;
     }
-
-
 }
 

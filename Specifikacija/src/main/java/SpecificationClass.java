@@ -60,7 +60,14 @@ public abstract class SpecificationClass {
      * Creates more directories with restriction calling method createDirectory() for each one.
      * Restriction represents a summed number of files and folders that can be saved in created directory.
      * Name of directories are formatted like: dirname + i
-     * where i is Integer variable going from 0 to numbewOfDirectories - 1
+     * where i is Integer variable going from 0 to numberOfDirectories - 1
+     * @param dirName
+     * @param restriction
+     * @param numOfDir
+     * @param level
+     * @throws UnauthorizedException
+     * @throws FolderException
+     * @throws StorageException
      */
     void createListOfDirRestriction(String dirName, Integer restriction, Integer numOfDir, Integer level) throws
             UnauthorizedException, FolderException, StorageException {
@@ -75,17 +82,27 @@ public abstract class SpecificationClass {
      * Creates more files calling method createFile() for each one.
      * Name of directories are formatted like: filename + i
      * where i is Integer variable going from 0 to numberOfFiles - 1
+     * @param filename
+     * @param numberOfFiles
+     * @param level
+     * @throws UnauthorizedException
+     * @throws FolderException
+     * @throws IOException
      */
     void createListOfFiles(String filename, Integer numberOfFiles, Integer level) throws UnauthorizedException, FolderException, IOException {
         if (level < 4) {
             for (int i = 0; i < numberOfFiles; i++) {
-                createFile(filename + i);
+                createFile(i + filename);
             }
         }
         else throw new UnauthorizedException();
     }
     /**
      * Creates new User which contains username, password and privilege.
+     * @param username
+     * @param password
+     * @param level
+     * @throws UnauthorizedException
      */
     abstract void createUser(String username, String password, Integer level) throws UnauthorizedException;
     /**
@@ -96,9 +113,9 @@ public abstract class SpecificationClass {
      * @throws UnauthorizedException
      */
     abstract void moveFile(String filename, String path) throws CantChangeRootException, UnauthorizedException; // move
-
     /**
      * With this method user can edit selected file.
+     * @param filename
      */
     abstract void editFile(String filename);
     /**
@@ -138,6 +155,11 @@ public abstract class SpecificationClass {
      * Da li ove dve metode treba da stoje u specifikaciji? mi smo ih napravili specijalno za komandnu
      * liniju, da li onda uopste treba da budu u implementaciji????
      */
+    /**
+     *
+     * @param filename
+     * @return
+     */
     abstract boolean goForward(String filename);
     abstract void goBackwards();
     /**
@@ -154,9 +176,12 @@ public abstract class SpecificationClass {
      * Option of sorting can be date or size.
      */
     abstract List<String> sort(String order, String ... option); // sort
-
     /**
      * Returns true if user is logged-in. Thus checks by connectedUser field.
+     * @param username
+     * @param password
+     * @return
+     * @throws UnauthorizedException
      */
     abstract boolean logIn(String username, String password) throws UnauthorizedException;
     /**
@@ -170,10 +195,12 @@ public abstract class SpecificationClass {
     abstract User getConnectedUser();
     /**
      * Return fileStorage object.
+     * @return
      */
     abstract FileStorage getStorage();
     /**
      * Reads information about restriction ........
+     * @param path
      */
     abstract void readConfig(String path);
     abstract boolean isStorage(String path);
