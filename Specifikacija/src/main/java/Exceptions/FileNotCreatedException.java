@@ -2,10 +2,7 @@ package Exceptions;
 
 public class FileNotCreatedException extends Exception{
 
-    String message = "Error: File not created";
-
-    public FileNotCreatedException() {
-    }
+    private String message = "Error: File not created";
 
     @Override
     public String getMessage() {

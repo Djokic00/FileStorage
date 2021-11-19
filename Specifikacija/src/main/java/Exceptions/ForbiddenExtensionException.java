@@ -2,7 +2,7 @@ package Exceptions;
 
 public class ForbiddenExtensionException extends Exception{
 
-    String message = "Error: Forbidden file extension";
+    private String message = "Error: Forbidden file extension";
 
     public ForbiddenExtensionException() {
     }

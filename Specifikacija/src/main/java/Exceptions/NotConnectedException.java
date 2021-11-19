@@ -2,10 +2,7 @@ package Exceptions;
 
 public class NotConnectedException extends Exception{
 
-    String message = "Error: Connection failed";
-
-    public NotConnectedException() {
-    }
+    private String message = "Error: Connection failed";
 
     @Override
     public String getMessage() {

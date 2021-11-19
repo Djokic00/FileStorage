@@ -7,7 +7,7 @@ public class User {
     /**
      * Level represents privilege of a specific user.
      * There are 4 hierarchical levels:
-     * 1 - super user (has access to all methods)
+     * 1 - superuser (has access to all methods)
      * 2 - does everything except creating new users
      * 3 - cannot move, download, copy and upload files and directories, cannot create new users
      * 4 - can just watch

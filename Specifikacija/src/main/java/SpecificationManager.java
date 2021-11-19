@@ -1,4 +1,4 @@
-public abstract class SpecificationManager extends SpecificationClass {
+public abstract class SpecificationManager {
     private static SpecificationClass exporter;
 
     public static void registerExporter(SpecificationClass exp) {

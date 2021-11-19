@@ -2,10 +2,7 @@ package Exceptions;
 
 public class NotStorageException extends Exception{
 
-    String message = "Error: Not a storage.";
-
-    public NotStorageException() {
-    }
+    private String message = "Error: Not a storage.";
 
     @Override
     public String getMessage() {

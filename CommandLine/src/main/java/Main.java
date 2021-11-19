@@ -1,40 +1,21 @@
-import Exceptions.UnauthorizedActionException;
-
-import java.io.File;
+import Exceptions.*;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
-    // /home/aleksa/Desktop/aa
-    // C:\Users\estoj
-
-
-    // pitanje2: gde ce nam biti napisana lista metoda vezana za privilegije? (Koje sve moze metode da pozove
-    //           korisnik sa odredjenom prvilegijom) Da li to stoji u dokumentaciji?
-    // pitanje4: ako ime foldera/fajla ima vise reci, kako cemo to parsirati? da li da ime korisnik unosi pod
-    //           navodnicima-> npr. cd "nov folder" ili da posle metodice stavi 2 tackice-> cd:novi folder
-    // pitanje5: kako cu pratiti koliko argumenata ima niz kad ga parsiramo ako se u imenu nalazi razmak?
-    //          - Surla rekla da ne mora razmak da se hendluje
-    //            pitam zbog exceptiona? da ostane ovako???
-
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        Class localClass;
-        SpecificationClass local = null;
         String currentPath = "";
-        String osSeparator = File.separator;
         Scanner input = new Scanner(System.in);
         String commandLine;
-        localClass = Class.forName("GoogleImplementation");
-       //localClass = Class.forName("LocalImplementation");
+        Class.forName("GoogleImplementation");
+//        Class.forName("LocalImplementation");
+        SpecificationClass local;
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
-
 
         while (true) {
             commandLine = input.nextLine();
@@ -52,9 +33,12 @@ public class Main {
                         Long storageSize = Long.parseLong(input.nextLine());
                         System.out.println("Set storage restriction or type n to abort:");
                         String restriction = input.nextLine();
-                        if (restriction.equals("n")) local.createStorage(currentPath, storageSize);
-                        else local.createStorage(currentPath, storageSize, restriction);
-                       // System.out.println("Storage path is " + local.getStorage().getStoragePath());
+                        try {
+                            if (restriction.equals("n")) local.createStorage(currentPath, storageSize);
+                            else local.createStorage(currentPath, storageSize, restriction);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         String username;
                         String password;
                         if (local.getConnectedUser() == null) {
@@ -70,11 +54,10 @@ public class Main {
                             System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                         } else System.out.println("Not connected");
                     } else System.out.println("Your path is already a storage.");
-
-
-                } catch (Exception e) {
-                    System.out.println("Too many or too few arguments.");
+                } catch (UnauthorizedException | NumberFormatException e) {
+                    e.printStackTrace();
                 }
+
             } else if (local.getConnectedUser() != null) {
                 if (parameters[0].equals("newuser")) {
                     try {
@@ -101,7 +84,7 @@ public class Main {
                             System.out.println("Password:");
                             String password = input.nextLine();
                             boolean connected = local.logIn(username, password);
-                            if (connected == true) System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
+                            if (connected) System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                             else System.out.println("Not connected!");
                         }
                     } catch (Exception e) {
@@ -109,24 +92,21 @@ public class Main {
                     }
 
                 } else if (parameters[0].equals("touch")) {
-                    System.out.println("Ucitao sam touch");
                     try {
                         if (parameters.length == 1) {
                             System.out.println("Error: You must enter a name for the file.");
                             continue;
                         }
-
-                        if (parameters.length == 3)
-                            local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]));
-                        else {
+                        if (parameters.length == 2)
                             local.createFile(parameters[1]);
-                        }
-                    } catch (UnauthorizedActionException e){
+                        else
+                            local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]), local.getConnectedUser().getLevel());
+
+                    } catch (UnauthorizedException e) {
+                        System.out.println(e.getMessage());
+                    } catch (FolderException e) {
                         System.out.println(e.getMessage());
                     }
-//                    catch (Exception e) {
-//                        System.out.println("Too many or too few arguments.");
-//                    }
                 } else if (parameters[0].equals("mkdir")) {
                     try {
                         if (parameters.length == 1) {
@@ -137,19 +117,20 @@ public class Main {
                                 local.createDirectory(parameters[2], Integer.parseInt(parameters[3]));
                             } else if (parameters.length == 5) {
                                 local.createListOfDirRestriction(parameters[2], Integer.parseInt(parameters[3]),
-                                        Integer.parseInt(parameters[4]));
+                                        Integer.parseInt(parameters[4]), local.getConnectedUser().getLevel());
                             } else if (parameters.length <= 3)
                                 System.out.println("Too few arguments.");
                         } else {
                             if (parameters.length == 3) {
-                                local.createListOfDirectories(parameters[1], Integer.parseInt(parameters[2]));
+                                local.createListOfDirectories(parameters[1], Integer.parseInt(parameters[2]),
+                                        local.getConnectedUser().getLevel());
                             } else if (parameters.length == 2) {
                                 local.createDirectory(parameters[1]);
                             } else if (parameters.length > 3)
                                 System.out.println("Too many arguments.");
                         }
-                    } catch (Exception e) {
-                        System.out.println("Too many or too few arguments.");
+                    } catch (StorageException | FolderException | UnauthorizedException | NumberFormatException e) {
+                        e.printStackTrace();
                     }
                 } else if (parameters[0].equals("rm")) {
                     try {
@@ -279,12 +260,16 @@ public class Main {
                     String username = input.nextLine();
                     System.out.println("Password:");
                     String password = input.nextLine();
+                try {
                     if (local.logIn(username, password)) {
                         System.out.println("Connected user: " + local.getConnectedUser().getUsername()
                                 + "; Privilege: " + local.getConnectedUser().getLevel());
                     }
+                } catch (UnauthorizedException e) {
+                    e.printStackTrace();
+                }
 
-                } else if (parameters[0].equals("exit")) {
+            } else if (parameters[0].equals("exit")) {
                     System.exit(0);
                 } else if (parameters[0].equals("path")) {
                     try {
@@ -315,17 +300,14 @@ public class Main {
                             }
 
                             boolean connected = local.logIn(username, password);
-                            if (connected == true) {
+                            if (connected) {
                                 System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                             }
                             else System.out.println("Not connected!");
 
                         }
-//                        else if (Files.exists(pathToStorage)) {
-//                            System.out.println("Error: not a storage");
-//                        } else if (Files.exists(pathToStorage) == false) {
-//                            System.out.println("Incorrect path or command!");}
                         else if (parameters[0].equals("exit")) System.exit(0);
+
                     } catch (Exception e) {
                         System.out.println("Too many or too few arguments.");
                         e.printStackTrace();

@@ -1,3 +1,13 @@
+Exceptions/UnauthorizedException.class
 SpecificationManager.class
-SpecificationInterface.class
+Exceptions/FileNotCreatedException.class
 SpecificationClass.class
+Exceptions/NotConnectedException.class
+model/FileStorage.class
+Exceptions/ForbiddenExtensionException.class
+Exceptions/NotStorageException.class
+model/User.class
+Exceptions/FolderException.class
+Exceptions/FileDoesntExistException.class
+Exceptions/CantChangeRootException.class
+Exceptions/StorageException.class

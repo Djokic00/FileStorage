@@ -4,19 +4,18 @@ import java.io.File;
 import java.util.HashMap;
 
 public class FileStorage {
-    String restrictionExtension;
-    String storagePath;
-    String currentPath;
-    Long size;
-    String storageName;
-    HashMap<String, Integer> folderRestrictions;
+    private String restrictionExtension;
+    private String storagePath;
+    private String currentPath;
+    private String storageName;
+    private Long size;
+    private HashMap<String, Integer> folderRestrictions;
 
     /**
      * Default constructor.
      * The current value will be null.
      */
-    public FileStorage() {
-    }
+    public FileStorage() {}
 
     /**
      * Parameterized constructor.
@@ -48,8 +47,6 @@ public class FileStorage {
         this.restrictionExtension = restrictionExtension;
         this.folderRestrictions = folderRestrictions;
     }
-
-
 
     public void setFolderRestrictions(HashMap<String, Integer> folderRestrictions) {
         this.folderRestrictions = folderRestrictions;

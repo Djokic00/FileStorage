@@ -1,9 +1,9 @@
 public class StorageJson {
-    String storageName;
-    String userId;
-    String configId;
-    String storageId;
-    String storageJsonId;
+    private String storageName;
+    private String userId;
+    private String configId;
+    private String storageId;
+    private String storageJsonId;
 
     public StorageJson(String storageName, String userId, String configId, String storageId, String storageJsonId) {
         this.storageName = storageName;
