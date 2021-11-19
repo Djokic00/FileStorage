@@ -1,7 +1,8 @@
 package Exceptions;
 
 public class StorageFullException extends Exception{
-    String message="Storage is full";
+
+    String message = "Error: Storage is full";
 
     public StorageFullException() {
     }

@@ -1,7 +1,15 @@
 package Exceptions;
 
 public class FileDoesntExistException extends Exception{
-    public FileDoesntExistException(String message) {
-        super(message);
+
+    String message = "Error: File with such name does not exist";
+
+    public FileDoesntExistException() {
     }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
 }

@@ -4,33 +4,52 @@ import java.io.File;
 import java.util.HashMap;
 
 public class FileStorage {
-    String restriction;
+    String restrictionExtension;
     String storagePath;
     String currentPath;
     Long size;
     String storageName;
     HashMap<String, Integer> folderRestrictions;
 
+    /**
+     * Default constructor.
+     * The current value will be null.
+     */
+    public FileStorage() {
+    }
+
+    /**
+     * Parameterized constructor.
+     * The values will be set to storageName and size.
+     */
+
     public FileStorage(String storageName, Long size) {
         this.storageName = storageName;
         this.size = size;
     }
+    /**
+     * Parameterized constructor.
+     * The values will be set to storageName, size and extension restriction.
+     */
 
-
-    public FileStorage(String storageName, Long size, String restriction) {
+    public FileStorage(String storageName, Long size, String restrictionExtension) {
         this.storageName = storageName;
         this.size = size;
-        this.restriction = restriction;
+        this.restrictionExtension = restrictionExtension;
     }
 
-    public FileStorage(String storageName, Long size, String restriction, HashMap<String, Integer> folderRestrictions) {
+    /**
+     * Parameterized constructor.
+     * The values will be set to storageName, size, extension restriction and folder restristions.
+     */
+    public FileStorage(String storageName, Long size, String restrictionExtension, HashMap<String, Integer> folderRestrictions) {
         this.storageName = storageName;
         this.size = size;
-        this.restriction = restriction;
+        this.restrictionExtension = restrictionExtension;
         this.folderRestrictions = folderRestrictions;
     }
 
-    public FileStorage() {}
+
 
     public void setFolderRestrictions(HashMap<String, Integer> folderRestrictions) {
         this.folderRestrictions = folderRestrictions;
@@ -41,11 +60,11 @@ public class FileStorage {
     }
 
     public String getRestriction() {
-        return restriction;
+        return restrictionExtension;
     }
 
     public void setRestriction(String restriction) {
-        this.restriction = restriction;
+        this.restrictionExtension = restriction;
     }
 
     public String getStoragePath() {

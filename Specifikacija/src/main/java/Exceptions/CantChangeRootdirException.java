@@ -1,7 +1,15 @@
 package Exceptions;
 
 public class CantChangeRootdirException extends Exception{
-    public CantChangeRootdirException(String message) {
-        super(message);
+
+    String message = "Error: Cannot change rootDirectory";
+
+    public CantChangeRootdirException() {
     }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
 }

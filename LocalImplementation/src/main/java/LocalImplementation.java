@@ -230,7 +230,14 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public boolean goForward(String filename){
         if (!isStorage(fileStorage.getCurrentPath()  + osSeparator + filename)) {
-            fileStorage.setCurrentPath(fileStorage.getCurrentPath() + osSeparator + filename);
+            List<String> list= new ArrayList<>();
+            list = listFilesFromDirectory();
+            for (String f: list){
+                if (f.equals(filename))
+                    fileStorage.setCurrentPath(fileStorage.getCurrentPath() + osSeparator + filename);
+            }
+
+
             return true;
         } else {
             fileStorage.setStoragePath(fileStorage.getCurrentPath()+osSeparator+filename);
@@ -250,9 +257,11 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     }
 
     @Override
-    public void moveFile(String filename, String newPath) {
+    public void moveFile(String filename, String newpath) {
+        String newPath = fileStorage.getStoragePath() + osSeparator + newpath;
         if (connectedUser.getLevel()<3) {
-            if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")) {
+//            if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")) {
+            if (!newPath.contains("rootDirectory")) {
                 try {
                     Files.move(Paths.get(getStorage().getCurrentPath() + osSeparator+filename),
                             Paths.get(newPath + osSeparator+filename), StandardCopyOption.REPLACE_EXISTING);
@@ -268,13 +277,15 @@ public class LocalImplementation extends SpecificationClass implements Specifica
 
 
     @Override
-    public boolean copyFile(String filename, String newPath){
+    public boolean copyFile(String filename, String newpath){
+        String newPath = fileStorage.getStoragePath() + osSeparator + newpath;
         if (connectedUser.getLevel()<3) {
             File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
             File s = new File(fileStorage.getStoragePath());
             if (fileStorage.getSize() - file.length() > 0) {
                 Path newDir = Paths.get(newPath);
-                if (newPath.contains(fileStorage.getStoragePath()) && !newPath.contains("rootDirectory")) {
+//                if (newPath.contains(fileStorage.getStoragePath()) && !newPath.contains("rootDirectory")) {
+                if (!newPath.contains("rootDirectory")) {
                     if (!file.isDirectory()) {
                         try {
                             Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), newDir.resolve(filename),
@@ -307,10 +318,46 @@ public class LocalImplementation extends SpecificationClass implements Specifica
     @Override
     public boolean uploadFile(String filename){
 
-        if (copyFile(filename, fileStorage.getStoragePath())) {
-            fileStorage.setCurrentPath(fileStorage.getStoragePath());
-            return true;
-        }
+        String newPath = fileStorage.getStoragePath();
+        if (connectedUser.getLevel()<3) {
+            File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
+            File s = new File(fileStorage.getStoragePath());
+            if (fileStorage.getSize() - file.length() > 0) {
+                Path newDir = Paths.get(newPath);
+                if (newPath.contains(fileStorage.getStoragePath()) && !newPath.contains("rootDirectory")) {
+                    if (!file.isDirectory()) {
+                        try {
+                            Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), newDir.resolve(filename),
+                                    StandardCopyOption.REPLACE_EXISTING);
+                            fileStorage.setSize(fileStorage.getSize() - file.length());
+                            fileStorage.setCurrentPath(fileStorage.getStoragePath());
+                            return true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            FileUtils.copyDirectory(file, new File(newPath + osSeparator + filename));
+                            fileStorage.setSize(fileStorage.getSize() - file.length());
+                            fileStorage.setCurrentPath(fileStorage.getStoragePath());
+                            return true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else errorHandler.generateError(ErrorType.CANNOT_CHANGE_ROOT);
+
+            } else errorHandler.generateError(ErrorType.STORAGE_IS_FULL);
+            //throwException da ne moze da menja van skladista ???
+            //throw exception ne moze rootDirectory  - odradjeno ???
+            // throw skladiste je puno - odradjeno
+        } else errorHandler.generateError(ErrorType.UNAUTHORIZED_ACTION);
+
+
+//        if (copyFile(filename, fileStorage.getStoragePath())) {
+//            fileStorage.setCurrentPath(fileStorage.getStoragePath());
+//            return true;
+//        }
         return false;
     }
 

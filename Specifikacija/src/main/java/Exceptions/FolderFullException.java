@@ -2,7 +2,14 @@ package Exceptions;
 
 public class FolderFullException extends Exception{
 
-    public FolderFullException(String message) {
-        super(message);
+    String message = "Error: Folder is full";
+
+    public FolderFullException() {
     }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
 }

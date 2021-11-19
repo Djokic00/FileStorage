@@ -1,7 +1,8 @@
 package Exceptions;
 
 public class UnauthorizedActionException extends Exception{
-    String message="Unautorized Action!";
+
+    String message = "Error: Unautorized Action!";
 
     public UnauthorizedActionException() {
     }
