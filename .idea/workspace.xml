@@ -2,7 +2,32 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fab6b7d5-dd0f-4473-8a46-1be56c94b969" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CommandLine/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/CommandLine/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CommandLine/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/CommandLine/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CommandLine/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/CommandLine/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CommandLine/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/CommandLine/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GoogleImplementation/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/GoogleImplementation/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GoogleImplementation/src/main/java/GoogleImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/GoogleImplementation/src/main/java/GoogleImplementation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GoogleImplementation/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/GoogleImplementation/target/maven-archiver/pom.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GoogleImplementation/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/GoogleImplementation/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GoogleImplementation/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LocalImplementation/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/LocalImplementation/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LocalImplementation/src/main/java/LocalImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/LocalImplementation/src/main/java/LocalImplementation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LocalImplementation/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/LocalImplementation/target/maven-archiver/pom.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LocalImplementation/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/LocalImplementation/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LocalImplementation/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/src/main/java/Exceptions/CantChangeRootException.java" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/src/main/java/Exceptions/CantChangeRootException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/src/main/java/Exceptions/FileDoesntExistException.java" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/src/main/java/Exceptions/FileDoesntExistException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/src/main/java/Exceptions/FileNotCreatedException.java" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/src/main/java/Exceptions/FileNotCreatedException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/src/main/java/SpecificationClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/src/main/java/SpecificationClass.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/src/main/java/model/FileStorage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/src/main/java/model/FileStorage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/src/main/java/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/src/main/java/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/target/maven-archiver/pom.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/Specifikacija/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Specifikacija/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +51,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/GoogleImplementation" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">

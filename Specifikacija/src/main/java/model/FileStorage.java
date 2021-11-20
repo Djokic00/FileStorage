@@ -11,26 +11,26 @@ public class FileStorage {
     private Long size;
     private HashMap<String, Integer> folderRestrictions;
 
+
     /**
      * Default constructor.
-     * The current value will be null.
      */
     public FileStorage() {}
 
     /**
-     * Parameterized constructor.
-     * The values will be set to storageName and size.
+     * @param storageName
+     * @param size
      */
-
     public FileStorage(String storageName, Long size) {
         this.storageName = storageName;
         this.size = size;
     }
-    /**
-     * Parameterized constructor.
-     * The values will be set to storageName, size and extension restriction.
-     */
 
+    /**
+     * @param storageName
+     * @param size
+     * @param restrictionExtension
+     */
     public FileStorage(String storageName, Long size, String restrictionExtension) {
         this.storageName = storageName;
         this.size = size;
@@ -38,8 +38,10 @@ public class FileStorage {
     }
 
     /**
-     * Parameterized constructor.
-     * The values will be set to storageName, size, extension restriction and folder restristions.
+     * @param storageName
+     * @param size
+     * @param restrictionExtension
+     * @param folderRestrictions
      */
     public FileStorage(String storageName, Long size, String restrictionExtension, HashMap<String, Integer> folderRestrictions) {
         this.storageName = storageName;

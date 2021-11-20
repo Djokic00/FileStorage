@@ -1,6 +1,7 @@
 import Exceptions.*;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,8 +12,8 @@ public class Main {
         String currentPath = "";
         Scanner input = new Scanner(System.in);
         String commandLine;
-        Class.forName("GoogleImplementation");
-//        Class.forName("LocalImplementation");
+//        Class.forName("GoogleImplementation");
+        Class.forName("LocalImplementation");
         SpecificationClass local;
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
@@ -54,8 +55,10 @@ public class Main {
                             System.out.println("Successfully connected! Level: " + local.getConnectedUser().getLevel());
                         } else System.out.println("Not connected");
                     } else System.out.println("Your path is already a storage.");
-                } catch (UnauthorizedException | NumberFormatException e) {
-                    e.printStackTrace();
+                } catch (UnauthorizedException e) {
+                    System.out.println(e.getMessage());
+                }catch (NumberFormatException e){
+
                 }
 
             } else if (local.getConnectedUser() != null) {
@@ -67,7 +70,10 @@ public class Main {
                         System.out.println("New user created: " + parameters[1]);
                         if (parameters.length > 5)
                             System.out.println("Too many arguments.");
-                    } catch (Exception e) {
+                    } catch (UnauthorizedException e){
+                        System.out.println(e.getMessage());
+                    }
+                    catch (Exception e) {
                         System.out.println("Too many or too few arguments.");
                     }
                 } else if (parameters[0].equals("cd")) {
@@ -102,9 +108,7 @@ public class Main {
                         else
                             local.createListOfFiles(parameters[1], Integer.parseInt(parameters[2]), local.getConnectedUser().getLevel());
 
-                    } catch (UnauthorizedException e) {
-                        System.out.println(e.getMessage());
-                    } catch (FolderException e) {
+                    } catch (UnauthorizedException | FolderException | ForbiddenExtensionException e) {
                         System.out.println(e.getMessage());
                     }
                 } else if (parameters[0].equals("mkdir")) {
@@ -130,32 +134,54 @@ public class Main {
                                 System.out.println("Too many arguments.");
                         }
                     } catch (StorageException | FolderException | UnauthorizedException | NumberFormatException e) {
-                        e.printStackTrace();
+                        System.out.println(e.getMessage());
                     }
                 } else if (parameters[0].equals("rm")) {
                     try {
                         if (parameters.length == 1)
                             System.out.println("Error: You must enter a name for the folder or file.");
                         local.deleteFile(parameters[1]);
-                    } catch (Exception e) {
+                    }catch (FileNotFoundException | UnauthorizedException e) {
+                        System.out.println(e.getMessage());
+                    }
+
+                    catch (Exception e) {
                         System.out.println("Too many or too few arguments.");
                     }
                 }
                 else if (parameters[0].equals("..")) {
                         local.goBackwards();
                         System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
-                    } else if (parameters[0].equals("move")) {
+
+                } else if (parameters[0].equals("move")) {
                         try {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
-                            String filename = parameters[1];
-                            System.out.println("Enter the path to the new location:");
-                            String newPath = input.nextLine();
-                            local.moveFile(filename, newPath);
-                        } catch (Exception e) {
+                            if (parameters.length == 2) {
+                                String filename = parameters[1];
+                                System.out.println("Enter the path to the new location:");
+                                String newPath = input.nextLine();
+                                local.moveFile(filename, newPath);
+                            } else if (parameters.length > 2) {
+                                String firstfilename = parameters[1];
+                                String[] lof = new String[parameters.length - 2];
+                                for (int i = 2; i < (parameters.length); i++) {
+                                    String p = parameters[i];
+                                    lof[i - 2] = p;
+                                }
+                                System.out.println("Enter the path to the new location:");
+                                String newPath = input.nextLine();
+                                System.out.println(newPath);
+                                local.moveFile(firstfilename, newPath, lof);
+                            }
+                        }catch (CantChangeRootException | UnauthorizedException e){
+                            System.out.println(e.getMessage());
+                        }
+                        catch (Exception e) {
                             System.out.println("Too many or too few arguments.");
                         }
-                    } else if (parameters[0].equals("ls")) {
+                        }else if (parameters[0].equals("ls")) {
+
                         try {
                             List <String> list=new ArrayList<>();
                             if (parameters.length > 1) {
@@ -190,21 +216,41 @@ public class Main {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
                             local.editFile(parameters[1]);
-                        } catch (Exception e) {
+                        } catch (UnauthorizedException | UnsupportedOperation e){
+                            System.out.println(e.getMessage());
+                        }
+                        catch (Exception e) {
                             System.out.println("Too many or too few arguments.");
                         }
                     } else if (parameters[0].equals("copy")) {
                         try {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
-                            String filename = parameters[1];
-                            System.out.println("Enter the path to the new location:");
-                            String newPath = input.nextLine();
-                            if (local.copyFile(filename, newPath)) {
-                                System.out.println("Copied: " + filename);
-                            }
 
-                        } catch (Exception e) {
+                            if (parameters.length == 2) {
+                                String filename = parameters[1];
+                                System.out.println("Enter the path to the new location:");
+                                String newPath = input.nextLine();
+                                if (local.copyFile(filename, newPath)) {
+                                    System.out.println("Copied: " + filename);
+                                }
+                            } else if (parameters.length > 2) {
+                                String firstfilename = parameters[1];
+                                String[] lof = new String[parameters.length - 2];
+                                for (int i = 2; i < (parameters.length); i++) {
+                                    String p = parameters[i];
+                                    lof[i - 2] = p;
+                                }
+                                System.out.println("Enter the path to the new location:");
+                                String newPath = input.nextLine();
+                                System.out.println(newPath);
+                                local.copyFile(firstfilename, newPath, lof);
+
+                            }
+                        }catch (CantChangeRootException | UnauthorizedException | StorageException e){
+                                System.out.println(e.getMessage());
+                        }
+                        catch (Exception e) {
                             System.out.println("Too many or too few arguments.");
                         }
                     } else if (parameters[0].equals("download")) {
@@ -215,35 +261,41 @@ public class Main {
                                 System.out.println("Download completed: " + parameters[1]);
                             }
 
-                        } catch (Exception e) {
+                        }catch (UnauthorizedException e){
+                            System.out.println(e.getMessage());
+                        }
+                        catch (Exception e) {
                             System.out.println("Too many or too few arguments.");
                         }
                     } else if (parameters[0].equals("upload")) {
                         try {
                             if (parameters.length == 1)
                                 System.out.println("Error: You must enter a name for the file.");
-                            if (local.uploadFile(parameters[1])) {
-                                System.out.println("Upload completed: " + parameters[1]);
+
+                            if (parameters.length == 2) {
+                                if (local.uploadFile(parameters[1])) {
+                                    System.out.println("Upload completed: " + parameters[1]);
+                                }
                             }
 
-                        } catch (Exception e) {
-                            System.out.println("Too many or too few arguments.");
+                        } catch (CantChangeRootException | UnauthorizedException | StorageException e) {
+                            System.out.println(e.getMessage());
                         }
                     } else if (parameters[0].equals("pwd")) {
-                        System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
+                        System.out.println("Currentpath: " + local.getCurrentLocation());
                     } else if (parameters[0].equals("logout")) {
                         local.logOut();
                     } else if (parameters[0].equals("list")) {
                         int privilege = local.getConnectedUser().getLevel();
                         if (privilege == 1) System.out.println("ns, mkdir, newuser, touch, ls, cd, .. , " +
-                                "pwd, login, logout, move, download, edit, rm, sort, exit");
+                                "pwd, logout, move, download, edit, rm, sort, exit");
                         if (privilege == 2) System.out.println("ns, mkdir, touch, ls, cd, .. , " +
-                                "pwd, login, logout, move, download, edit rm, sort, exit");
+                                "pwd, logout, move, download, edit rm, sort, exit");
                         if (privilege == 3) System.out.println("ns, mkdir, touch, ls, cd, .. , " +
-                                "pwd, login, logout, edit, rm, sort, exit");
+                                "pwd, logout, edit, rm, sort, exit");
                         if (privilege == 4) System.out.println("ns, ls, cd, .. , " +
-                                "pwd, login, logout, sort, exit");
-                    } else if (parameters[0].equals("login")) System.out.println("Already connected.");
+                                "pwd, logout, sort, exit");
+                    }
 
                     else if (parameters[0].equals("exit")) System.out.println("First disconnect using logout command.");
 
@@ -251,23 +303,24 @@ public class Main {
                         System.out.println(parameters[0] + " command not found");
                     }
                 } else if (parameters[0].equals("list")) {
-                    System.out.println("You can only use ns, path or login command.");
+                    System.out.println("You can only use ns or path command.");
 
-                } else if (parameters[0].equals("login")) {
-                    //currentPath = local.getStorage().getPath();
-                    System.out.println("Storage path is " + local.getStorage().getStoragePath());
-                    System.out.println("Username:");
-                    String username = input.nextLine();
-                    System.out.println("Password:");
-                    String password = input.nextLine();
-                try {
-                    if (local.logIn(username, password)) {
-                        System.out.println("Connected user: " + local.getConnectedUser().getUsername()
-                                + "; Privilege: " + local.getConnectedUser().getLevel());
-                    }
-                } catch (UnauthorizedException e) {
-                    e.printStackTrace();
-                }
+//                } else if (parameters[0].equals("login")) {
+//                    //currentPath = local.getStorage().getPath();
+//                    System.out.println("Storage path is " + local.getStorage().getStoragePath());
+//                    System.out.println("Username:");
+//                    String username = input.nextLine();
+//                    System.out.println("Password:");
+//                    String password = input.nextLine();
+//                try {
+//                    if (local.logIn(username, password)) {
+//                        System.out.println("Connected user: " + local.getConnectedUser().getUsername()
+//                                + "; Privilege: " + local.getConnectedUser().getLevel());
+//                    }
+//                } catch (UnauthorizedException e) {
+//                    //e.printStackTrace();
+//                    System.out.println(e.getMessage());
+//                }
 
             } else if (parameters[0].equals("exit")) {
                     System.exit(0);
@@ -278,11 +331,6 @@ public class Main {
 
                         local = SpecificationManager.getExporter(parameters[1]);
 
-//                        metoda existsStorage()
-//                        if (Files.exists(pathToStorage) && local.isStorage(parameters[1])) {
-//                            local.readConfig(parameters[1]);
-//                            local.getStorage().setStoragePath(parameters[1]);
-//                            local.getStorage().setCurrentPath(parameters[1]);
                         if (local.isStorage(parameters[1]) == true){
                             local.readConfig(parameters[1]);
                             String username;
@@ -310,7 +358,7 @@ public class Main {
 
                     } catch (Exception e) {
                         System.out.println("Too many or too few arguments.");
-                        e.printStackTrace();
+                       // e.printStackTrace();
                     }
                 }
             }

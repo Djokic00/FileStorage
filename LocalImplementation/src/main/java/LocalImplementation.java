@@ -26,16 +26,15 @@ public class LocalImplementation extends SpecificationClass {
         SpecificationManager.registerExporter(new LocalImplementation());
     }
 
-    public LocalImplementation(){}
+    private LocalImplementation(){}
 
     @Override
-    public void createFile(String filename) throws UnauthorizedException, IOException, FolderException {
+    public void createFile(String filename) throws UnauthorizedException, IOException, FolderException,ForbiddenExtensionException {
         if (connectedUser.getLevel() < 4) {
             File newFile = new File(fileStorage.getCurrentPath() + osSeparator + filename);
             if (fileStorage.getRestriction() != null) {
                 if (filename.endsWith(fileStorage.getRestriction())) {
-                    //System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
-                    return;
+                    throw new ForbiddenExtensionException();
                 }
             }
             if (mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
@@ -84,6 +83,12 @@ public class LocalImplementation extends SpecificationClass {
 
     @Override
     public void createStorage(String path, Long storageSize, String... restrictions) {
+
+        if (!path.contains(osSeparator)){
+            path = System.getProperty("user.home")+ osSeparator + path;
+            System.out.println(path);
+        }
+
         if (restrictions.length > 0) {
             fileStorage = new FileStorage(path, storageSize, restrictions[0]);
         }
@@ -144,39 +149,41 @@ public class LocalImplementation extends SpecificationClass {
     @Override
     public void createUser(String username, String password, Integer level) throws UnauthorizedException {
         if ((connectedUser == null) || connectedUser.getLevel() == 1) {
-            try {
-                Gson gson = new Gson();
-                User user = new User(username, password, level);
-                String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json";
-                if (new File(path).length() == 0) {
-                    FileWriter file = new FileWriter(path);
-                    jsonForUser.append("[");
-                    jsonForUser.append(gson.toJson(user));
-                    jsonForUser.append("]");
-                    file.write(String.valueOf(jsonForUser));
-                    file.close();
-                }
-                else {
-                    BufferedReader reader = new BufferedReader(new FileReader(path));
-                    jsonForUser = new StringBuilder(reader.readLine());
-                    jsonForUser.deleteCharAt(jsonForUser.length() - 1);
-                    jsonForUser.append(",");
-                    jsonForUser.append(gson.toJson(user));
-                    jsonForUser.append("]");
-                    FileWriter file = new FileWriter(path);
-                    file.write(String.valueOf(jsonForUser));
-                    file.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        User user = new User(username, password, level);
+        writeToJsonFile("users.json", user);
+
+//            try {
+//                Gson gson = new Gson();
+//                User user = new User(username, password, level);
+//                String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json";
+//                if (new File(path).length() == 0) {
+//                    FileWriter file = new FileWriter(path);
+//                    jsonForUser.append("[");
+//                    jsonForUser.append(gson.toJson(user));
+//                    jsonForUser.append("]");
+//                    file.write(String.valueOf(jsonForUser));
+//                    file.close();
+//                }
+//                else {
+//                    BufferedReader reader = new BufferedReader(new FileReader(path));
+//                    jsonForUser = new StringBuilder(reader.readLine());
+//                    jsonForUser.deleteCharAt(jsonForUser.length() - 1);
+//                    jsonForUser.append(",");
+//                    jsonForUser.append(gson.toJson(user));
+//                    jsonForUser.append("]");
+//                    FileWriter file = new FileWriter(path);
+//                    file.write(String.valueOf(jsonForUser));
+//                    file.close();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }  else throw new UnauthorizedException();
     }
 
-    // Treba dodati u Specifikaciju ?
+    @Override
+    public void writeToConfig(FileStorage fileStorage) {
 
-    void writeToConfig(Object object) {
-        if (object instanceof FileStorage) fileStorage = (FileStorage) object;
         Gson gson = new Gson();
         String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "config.json";
         try {
@@ -240,35 +247,72 @@ public class LocalImplementation extends SpecificationClass {
     }
 
     @Override
-    public void moveFile(String filename, String newpath) throws CantChangeRootException, UnauthorizedException {
+    public void moveFile(String filename, String newpath, String...files) throws CantChangeRootException, UnauthorizedException {
+
         String newPath = fileStorage.getStoragePath() + osSeparator + newpath;
-        if (connectedUser.getLevel() < 3) {
-//            if (newPath.contains(getStorage().getStoragePath()) && !newPath.contains("rootDirectory")) {
-            if (!newPath.contains("rootDirectory")) {
-                try {
-                    Files.move(Paths.get(getStorage().getCurrentPath() + osSeparator+filename),
-                            Paths.get(newPath + osSeparator+filename), StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
 
+        if (files.length == 0) {
+            if (connectedUser.getLevel() < 3) {
+                if (!newPath.contains("rootDirectory")) {
+                    try {
+                        Files.move(Paths.get(getStorage().getCurrentPath() + osSeparator + filename),
+                                Paths.get(newPath + osSeparator + filename), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                    }
+
+                } else if (newPath.contains("rootDirectory")) {
+                    throw new CantChangeRootException();
                 }
-
-            } else if (newPath.contains("rootDirectory")) {
-                throw new CantChangeRootException();
+            } else throw new UnauthorizedException();
+        } else if (files.length>0) {
+            moveFile(filename, newpath);
+            for (String f : files) {
+                moveFile(f, newpath);
             }
-        } else throw new UnauthorizedException();
+        }
     }
 
 
     @Override
-    public boolean copyFile(String filename, String newpath) throws
+    public boolean copyFile(String filename, String newpath, String...files) throws
             CantChangeRootException, UnauthorizedException, StorageException {
         String newPath = fileStorage.getStoragePath() + osSeparator + newpath;
+        if (files.length == 0) {
+            if (copy(filename,newPath)==true){
+                return true;
+            }
+        } else if (files.length>0) {
+            copy(filename, newPath);
+            for (String f : files) {
+                if (copy(f,newPath)==true){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public boolean uploadFile(String filename) throws CantChangeRootException, UnauthorizedException, StorageException {
+
+        String newPath = fileStorage.getStoragePath();
+
+            if (copy(filename,newPath)==true){
+                fileStorage.setCurrentPath(fileStorage.getStoragePath());
+                return true;
+            }
+
+        return false;
+    }
+
+    public boolean copy(String filename, String newPath) throws CantChangeRootException, StorageException, UnauthorizedException {
+
         if (connectedUser.getLevel()<3) {
             File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
             File s = new File(fileStorage.getStoragePath());
             if (fileStorage.getSize() - file.length() > 0) {
                 Path newDir = Paths.get(newPath);
-//                if (newPath.contains(fileStorage.getStoragePath()) && !newPath.contains("rootDirectory")) {
                 if (!newPath.contains("rootDirectory")) {
                     if (!file.isDirectory()) {
                         try {
@@ -278,6 +322,7 @@ public class LocalImplementation extends SpecificationClass {
                             return true;
                         } catch (IOException e) {
                             e.printStackTrace();
+
                         }
                     } else {
                         try {
@@ -285,60 +330,16 @@ public class LocalImplementation extends SpecificationClass {
                             fileStorage.setSize(fileStorage.getSize() - file.length());
                         } catch (IOException e) {
                             e.printStackTrace();
+
                         }
                     }
-                } else throw new CantChangeRootException();
+                }else throw new CantChangeRootException();
 
             } else throw new StorageException();
-
         } else throw new UnauthorizedException();
 
         return false;
-    }
 
-    // Mozda ovde neki exception
-    @Override
-    public boolean uploadFile(String filename) throws CantChangeRootException, UnauthorizedException, StorageException {
-
-        String newPath = fileStorage.getStoragePath();
-        if (connectedUser.getLevel()<3) {
-            File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
-            File s = new File(fileStorage.getStoragePath());
-            if (fileStorage.getSize() - file.length() > 0) {
-                Path newDir = Paths.get(newPath);
-                if (newPath.contains(fileStorage.getStoragePath()) && !newPath.contains("rootDirectory")) {
-                    if (!file.isDirectory()) {
-                        try {
-                            Files.copy(Paths.get(getStorage().getCurrentPath() + osSeparator + filename), newDir.resolve(filename),
-                                    StandardCopyOption.REPLACE_EXISTING);
-                            fileStorage.setSize(fileStorage.getSize() - file.length());
-                            fileStorage.setCurrentPath(fileStorage.getStoragePath());
-                            return true;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        try {
-                            FileUtils.copyDirectory(file, new File(newPath + osSeparator + filename));
-                            fileStorage.setSize(fileStorage.getSize() - file.length());
-                            fileStorage.setCurrentPath(fileStorage.getStoragePath());
-                            return true;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } else throw new CantChangeRootException();
-
-            } else throw new StorageException();
-
-        } else throw new UnauthorizedException();
-
-
-//        if (copyFile(filename, fileStorage.getStoragePath())) {
-//            fileStorage.setCurrentPath(fileStorage.getStoragePath());
-//            return true;
-//        }
-        return false;
     }
 
     @Override
@@ -366,7 +367,7 @@ public class LocalImplementation extends SpecificationClass {
                     FileUtils.copyDirectory(file, new File(System.getProperty("user.home") +
                             osSeparator + "StorageDownloads" + osSeparator + filename));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                        e.printStackTrace();
                 }
             }
         } else throw new UnauthorizedException();
@@ -491,7 +492,8 @@ public class LocalImplementation extends SpecificationClass {
     }
 
     @Override
-    public void editFile(String filename) {
+    public void editFile(String filename) throws UnauthorizedException{
+        if (connectedUser.getLevel() < 4){
         File file = new File(fileStorage.getCurrentPath() + osSeparator + filename);
         if (connectedUser.getLevel() < 4) file.setWritable(true);
         else file.setWritable(false);
@@ -501,6 +503,7 @@ public class LocalImplementation extends SpecificationClass {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        } else throw new UnauthorizedException();
     }
 
     @Override
@@ -560,8 +563,40 @@ public class LocalImplementation extends SpecificationClass {
     }
 
     @Override
-    public void writeToJsonFile(String s, Object o) {
+    public void writeToJsonFile(String filename, Object obj) {
+        User user = (User) obj;
+        try {
+                Gson gson = new Gson();
+                String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + filename;
+                if (new File(path).length() == 0) {
+                    FileWriter file = new FileWriter(path);
+                    jsonForUser.append("[");
+                    jsonForUser.append(gson.toJson(user));
+                    jsonForUser.append("]");
+                    file.write(String.valueOf(jsonForUser));
+                    file.close();
+                }
+                else {
+                    BufferedReader reader = new BufferedReader(new FileReader(path));
+                    jsonForUser = new StringBuilder(reader.readLine());
+                    jsonForUser.deleteCharAt(jsonForUser.length() - 1);
+                    jsonForUser.append(",");
+                    jsonForUser.append(gson.toJson(user));
+                    jsonForUser.append("]");
+                    FileWriter file = new FileWriter(path);
+                    file.write(String.valueOf(jsonForUser));
+                    file.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+    }
+
+    @Override
+    public String getCurrentLocation(){
+        String currentLocation = fileStorage.getCurrentPath();
+        return currentLocation;
     }
 
     @Override
