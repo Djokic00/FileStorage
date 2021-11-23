@@ -1,0 +1,15 @@
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/StorageException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/model/FileStorage.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/SpecificationClass.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/SpecificationManager.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/ForbiddenExtensionException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/CantChangeRootException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/NotStorageException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/FileNotCreatedException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/NotConnectedException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/FolderException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/AlreadyExistsException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/UnauthorizedException.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/model/User.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/UnsupportedOperation.java
+/home/aleksa/Documents/Java Projects/SK1/Specifikacija/src/main/java/Exceptions/FileDoesntExistException.java
