@@ -13,7 +13,8 @@ public class Main {
         Scanner input = new Scanner(System.in);
         String commandLine;
         Class.forName("GoogleImplementation");
-//        Class.forName("LocalImplementation");
+        
+        //Class.forName("LocalImplementation");
         SpecificationClass local;
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
@@ -28,7 +29,7 @@ public class Main {
                         System.out.println("Error: You must enter a path.");
                     currentPath = "";
                     currentPath += parameters[1];
-                    local = SpecificationManager.getExporter(currentPath);
+                    //local = SpecificationManager.getExporter(currentPath);
                     if (local.isStorage(currentPath) == false) {
                         System.out.println("Set maximum size of the storage:");
                         Long storageSize = Long.parseLong(input.nextLine());

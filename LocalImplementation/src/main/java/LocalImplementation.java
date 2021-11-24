@@ -594,7 +594,7 @@ public class LocalImplementation extends SpecificationClass {
     }
 
     @Override
-    public String getCurrentLocation(){
+    public String getCurrentLocation() {
         String currentLocation = fileStorage.getCurrentPath();
         return currentLocation;
     }
