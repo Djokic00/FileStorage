@@ -140,7 +140,6 @@ public class GoogleImplementation extends SpecificationClass {
     public void createFile(String filename) throws IOException, ForbiddenExtensionException {
         if (fileStorage.getRestriction() != null && filename.contains(fileStorage.getRestriction())) {
             throw new ForbiddenExtensionException();
-            //System.out.println("You cannot make file with " + fileStorage.getRestriction() + " extension");
         }
         File file;
         if (!compareNames(filename)) {
@@ -161,33 +160,13 @@ public class GoogleImplementation extends SpecificationClass {
             }
             else {
                 file = service.files().create(fileMetadata).setFields("id, parents").execute();
-                //System.out.println("File ID: " + file.getParents());
                 file.setName(filename);
                 if (filename.contains("users.json")) usersId = file.getId();
                 if (filename.contains("config.json")) configId = file.getId();
                 if (filename.contains("storage.json")) storageJsonId = file.getId();
             }
-
-            //fileMetadata2.setFileExtension("txt");
-            // java.io.File filePath = new java.io.File("files/photo.jpg");
-            // FileContent mediaContent = new FileContent("image/jpeg", filePath);
-
         } else System.out.println("File with such name already exists");
     }
-
-//    void solve(Integer restriction) {
-//        File fileMetadata = new File();
-//        fileMetadata.setName(directoryName);
-//        fileMetadata.setMimeType("application/vnd.google-apps.folder");
-//        if (fileStorage.getCurrentPath() != null) {
-//            fileMetadata.setParents(Collections.singletonList(fileStorage.getCurrentPath()));
-//            System.out.println("setuje parenta " + fileStorage.getCurrentPath());
-//        }
-//        File file = null;
-//        file = service.files().create(fileMetadata).setFields("id").execute();
-//        mapOfDirRestrictions.put(fileId, restriction[0]);
-//        fileStorage.setFolderRestrictions(mapOfDirRestrictions);
-//    }
 
     @Override
     public void createDirectory(String directoryName, Integer... restriction) throws StorageException {
@@ -209,7 +188,6 @@ public class GoogleImplementation extends SpecificationClass {
                 }
             }
             else if (fileStorage.getStoragePath() != null && mapOfDirRestrictions.containsKey(fileStorage.getCurrentPath()) == true) {
-                //System.out.println("Ulazi");
                 Integer numberOfFilesLeft = mapOfDirRestrictions.get(fileStorage.getCurrentPath());
                 if (numberOfFilesLeft > 0) {
                     if (fileStorage.getSize() - 4096 > 0) {
@@ -257,8 +235,6 @@ public class GoogleImplementation extends SpecificationClass {
             fileStorage = new FileStorage(storageName, size, restrictions[0]);
         }
         else fileStorage = new FileStorage(storageName, size);
-
-
         try {
             createDirectory(storageName);
             createDirectory("rootDirectory");
@@ -294,7 +270,6 @@ public class GoogleImplementation extends SpecificationClass {
             if (files.length == 0) {
                 String fileId = getIdByName(filename);
                 String folderId = getIdByName(newPath);
-// Retrieve the existing parents to remove
                 File file = null;
                 try {
                     file = service.files().get(fileId)
@@ -367,41 +342,11 @@ public class GoogleImplementation extends SpecificationClass {
         } catch (IOException e) {
            // e.printStackTrace();
         }
-
-//
-//        Path downloadDir = Paths.get(System.getProperty("user.home")+osSeparator+"StorageDownloads");
-//
-//        if (!Files.exists(downloadDir)) {
-//            java.io.File newDir = new java.io.File(System.getProperty("user.home") + osSeparator + "StorageDownloads");
-//            System.out.println("napravio sam storageDownloads");
-//            newDir.mkdir();
-//        }
-//        OutputStream outputStream = null;
-//        try {
-//            outputStream = new FileOutputStream(System.getProperty("user.home") + osSeparator + "StorageDownloads" +
-//                    osSeparator + filename);
-//        } catch (FileNotFoundException e) {
-//            System.out.println("ovde pucam");
-//        }
-//
-//        System.out.println("skinuo sam fajlic " + fileId);
-//        System.out.println("kraj metode");
         return true;
     }
 
     @Override
     public boolean uploadFile(String path) {
-//        File fileMetadata = new File();
-//        fileMetadata.setTitle("My Report");
-//        fileMetadata.setMimeType("application/vnd.google-apps.spreadsheet");
-//
-//        java.io.File filePath = new java.io.File("files/report.csv");
-//        FileContent mediaContent = new FileContent("text/csv", filePath);
-//        File file = driveService.files().insert(fileMetadata, mediaContent)
-//                .setFields("id")
-//                .execute();
-//        System.out.println("File ID: " + file.getId());
-
         if (connectedUser.getLevel() < 3) {
             java.io.File filePath = new java.io.File(path);
             if (!filePath.isDirectory()) {
@@ -475,9 +420,7 @@ public class GoogleImplementation extends SpecificationClass {
                     return false;
                 }
             } else if (files.length > 0) {
-                // System.out.println("ulazim ovde");
                 copyFile(filename, newPath);
-                //System.out.println("pomerio " + filename);
                 for (String f : files) {
                     if (copyFile(f, newPath) == true) {
                         return true;
@@ -731,8 +674,8 @@ public class GoogleImplementation extends SpecificationClass {
             ArrayList<FileStorage> storageArray = gson.fromJson(reader, storageListType);
             for (FileStorage file: storageArray) {
                 fileStorage = file;
-//                if (fileStorage.getFolderRestrictions() != null)
-//                    mapOfDirRestrictions = fileStorage.getFolderRestrictions();
+                if (fileStorage.getFolderRestrictions() != null)
+                    mapOfDirRestrictions = fileStorage.getFolderRestrictions();
             }
             reader.close();
         } catch (Exception e){
@@ -828,7 +771,6 @@ public class GoogleImplementation extends SpecificationClass {
             }
             FileContent mediaContent = new FileContent(file.getMimeType(), new java.io.File(path));
             File updated = new File();
-            //System.out.println("fileid " + file.getId());
             service.files().update(file.getId(), updated, mediaContent).execute();
         } catch (Exception e) {
             e.printStackTrace();
@@ -879,40 +821,16 @@ public class GoogleImplementation extends SpecificationClass {
 
             for (File qq : fajlovi) {
                 try {
-                    System.out.println("parent " + qq.getParents());
                     if (qq.getParents().contains(fileStorage.getCurrentPath()) && qq.getName().equals(filename)){
                         fileId=qq.getId();
                         System.out.println(fileId + " = "+ qq.getId());
                     }
-//                    ne radi get id by name van current patha pa onda ne moze da kopira nesto (iz foldera koji je u skladistu )
-//                    ->u skladiste
-//                    ne moze ni da kopira iz foldera u folderu -> unazad u njegovog roditelja
-//                    else if (qq.getParents().contains(fileStorage.getStoragePath()) && qq.getName().equals(filename)){
-//                        fileId=qq.getId();
-//                        System.out.println(fileId + " = "+ qq.getId());
-//                    }
-
-
-//                      if (qq.getName().equals(filename)){
-//                          fileId=qq.getId();
-//                      }
-
-//                    else if (isStorage(filename)){
-//                        fileId=fileStorage.getStoragePath();
-//                    }
-
-                  //  System.out.println(fileId + " = "+ qq.getId());
-//                    if (fileStorage.getCurrentPath().equals(fileStorage.getStoragePath())){
-//
-//                    }
-                }catch (Exception e){
-                    System.out.println("Nisam vratio ID ");
+                }catch (Exception e) {
                 }
             }
             if (fileId == "" && compareStorageNames(filename) != ""){
                 //prodje kroz json
                 fileId = compareStorageNames(filename);
-               // System.out.println(fileId);
             }
         }
         return fileId;
@@ -925,19 +843,15 @@ public class GoogleImplementation extends SpecificationClass {
 
         List<File> fajlovi = lista.getFiles();
         if (fajlovi != null || !fajlovi.isEmpty()) {
-
             for (File qq : fajlovi) {
                 try {
                     if (qq.getId().contains(fileStorage.getCurrentPath()) ){
 
                     List<String> parents = qq.getParents();
                     parentId=parents.get(0);
-                   // System.out.println("size niza ParentId " + parentId);
                     } else if (qq.getId().contains(fileStorage.getStoragePath()))
                         parentId=fileStorage.getStoragePath();
-                    //System.out.println("u skladistu sam");
                 }catch (Exception e){
-                   // System.out.println("Nisam vratio ID ");
                 }
             }
         }
@@ -947,7 +861,6 @@ public class GoogleImplementation extends SpecificationClass {
     public boolean compareNames(String filename) {
         if (fileStorage.getCurrentPath() == null) return false;
         FileList list = null;
-
         try{
             list = service.files().list().setCorpora("user").setQ("'" + fileStorage.getCurrentPath()+"' in parents")
                     .setPageSize(50)
@@ -969,20 +882,17 @@ public class GoogleImplementation extends SpecificationClass {
             }
        }
         return false;
-
     }
 
     public String compareNamesToJson(String filename) {
         FileList lista = null;
         String jsonId = "";
-
         try {
             lista = service.files().list().setPageSize(30)
                     .setFields("nextPageToken, files(id, name, parents)").execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         List<File> fajlovi = lista.getFiles();
         if (fajlovi != null || !fajlovi.isEmpty()) {
 
@@ -991,12 +901,9 @@ public class GoogleImplementation extends SpecificationClass {
                     if (qq.getName().equals(filename)) {
                         System.out.println(qq.getName());
                         jsonId=qq.getId();
-                       // System.out.println("storageJsonId " + jsonId);
                         return jsonId;
                     }
                 }catch (Exception e){
-                   // System.out.println("Nisam vratio ID ");
-
                 }
             }
         }

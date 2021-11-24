@@ -12,8 +12,8 @@ public class Main {
         String currentPath = "";
         Scanner input = new Scanner(System.in);
         String commandLine;
-//        Class.forName("GoogleImplementation");
-        Class.forName("LocalImplementation");
+        Class.forName("GoogleImplementation");
+//        Class.forName("LocalImplementation");
         SpecificationClass local;
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
