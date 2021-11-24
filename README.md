@@ -14,3 +14,5 @@ Command line operations:
 * .. - 
 * pwd - print the name of the current working directory
 * rm fileName - removes file or directory
+
+## Code Contributors
