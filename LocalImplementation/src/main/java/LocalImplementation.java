@@ -114,70 +114,11 @@ public class LocalImplementation extends SpecificationClass {
         writeToConfig(fileStorage);
     }
 
-//    @Override
-//    public void createListOfDirectories(String dirName, Integer numberOfDirectories) throws
-//            UnauthorizedException, FolderException, StorageException {
-//        if (connectedUser.getLevel() < 4) {
-//            for (int i = 0; i < numberOfDirectories; i++) {
-//                createDirectory(dirName + i);
-//            }
-//            if (numberOfDirectories == 0) createDirectory(dirName + '0');
-//
-//        } else throw new UnauthorizedException();
-//    }
-//    @Override
-//    public void createListOfDirRestriction(String dirName, Integer restriction, Integer numberOfDirectories) throws
-//            UnauthorizedException, FolderException, StorageException {
-//        if (connectedUser.getLevel()<4) {
-//            for (int i = 0; i < numberOfDirectories; i++) {
-//                createDirectory(dirName + i, restriction);
-//            }
-//        }
-//        else throw new UnauthorizedException();
-//    }
-//
-//    @Override
-//    public void createListOfFiles(String filename, Integer numberOfFiles) throws
-//            UnauthorizedException, FolderException, IOException {
-//        if (connectedUser.getLevel() < 4) {
-//            for (int i = 0; i < numberOfFiles; i++) {
-//                createFile(filename + i);
-//            }
-//        } else throw new UnauthorizedException();
-//    }
-
     @Override
     public void createUser(String username, String password, Integer level) throws UnauthorizedException {
         if ((connectedUser == null) || connectedUser.getLevel() == 1) {
         User user = new User(username, password, level);
         writeToJsonFile("users.json", user);
-
-//            try {
-//                Gson gson = new Gson();
-//                User user = new User(username, password, level);
-//                String path = fileStorage.getStoragePath() + osSeparator + "rootDirectory" + osSeparator + "users.json";
-//                if (new File(path).length() == 0) {
-//                    FileWriter file = new FileWriter(path);
-//                    jsonForUser.append("[");
-//                    jsonForUser.append(gson.toJson(user));
-//                    jsonForUser.append("]");
-//                    file.write(String.valueOf(jsonForUser));
-//                    file.close();
-//                }
-//                else {
-//                    BufferedReader reader = new BufferedReader(new FileReader(path));
-//                    jsonForUser = new StringBuilder(reader.readLine());
-//                    jsonForUser.deleteCharAt(jsonForUser.length() - 1);
-//                    jsonForUser.append(",");
-//                    jsonForUser.append(gson.toJson(user));
-//                    jsonForUser.append("]");
-//                    FileWriter file = new FileWriter(path);
-//                    file.write(String.valueOf(jsonForUser));
-//                    file.close();
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
         }  else throw new UnauthorizedException();
     }
 
