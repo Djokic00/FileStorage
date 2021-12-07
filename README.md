@@ -21,22 +21,22 @@ Notation:
 
 ### Command line operations:
 
-- list - list of all available operations
-- ns (path) - creates a new storage (path is absolute path)
-- path (path to storage) - absolute path to storage
-- mkdir (folderName) [number of folders] - makes one or more new directories
-- mkdir -res (folderName) (restriction) [number of folders] - makes one or more directories with limited number of folders and files in it
-- touch (fileName) - makes new file
-- cd (fileName) - change current directory to fileName
-- cd.. - goes one step back from current directory
-- pwd - print the name of the current working directory
-- rm (fileName) - removes file or directory
-- logout - disconnect the user (to connect again type path <path to storage>)
-- sort (asc or desc) [] - sort files in current directory
-- ls [filter] - list files in current directory ( filter can be .txt or .jpeg or anything after dot (.) )
-- exit - exits from application
+- <b>list</b> - list of all available operations
+- <b>ns (path)</b> - creates a new storage (path is absolute path)
+- <b>path (path to storage)</b> - absolute path to storage
+- <b>mkdir (folderName) [number of folders]</b> - makes one or more new directories
+- <b>mkdir -res (folderName) (restriction) [number of folders]</b> - makes one or more directories with limited number of folders/files in it
+- <b>touch (fileName)</b> - makes new file
+- <b>cd (fileName)</b> - change current directory to fileName
+- <b>cd..</b> - goes one step back from current directory
+- <b>pwd</b> - print the name of the current working directory
+- <b>rm (fileName)</b> - removes file or directory
+- <b>logout</b> - disconnect the user (to connect again type path <path to storage>)
+- <b>sort (asc or desc) [date or size]</b> - sort files in current directory, if optional argument is empty it sort files alphabetically
+- <b>ls [filter]</b> - list files in current directory ( filter can be .txt or .jpeg or anything after dot (.) )
+- <b>exit</b> - exits from application
 
-## Config and User example
+ ## Config.json & Users.json
   ![config.json](Pictures/config.png)
   ![users.json](Pictures/users.png)
 
