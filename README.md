@@ -2,7 +2,7 @@
 
 ## About The Project
 
-File storage is just a folder that has config.json (information about size and restrictions in that storage) and users.json which acts like database for storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive. 
+File storage is simply a folder that contains config.json (information about size and restrictions in that storage) and users.json which acts like database for storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive. 
 
 ## Build process
 
