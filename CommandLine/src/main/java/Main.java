@@ -12,9 +12,8 @@ public class Main {
         String currentPath = "";
         Scanner input = new Scanner(System.in);
         String commandLine;
-        Class.forName("GoogleImplementation");
-        
-        //Class.forName("LocalImplementation");
+        //Class.forName("GoogleImplementation");
+        Class.forName("LocalImplementation");
         SpecificationClass local;
 
         System.out.println("Enter path to the storage using path command or make a storage using ns command: ");
@@ -150,7 +149,7 @@ public class Main {
                         System.out.println("Too many or too few arguments.");
                     }
                 }
-                else if (parameters[0].equals("..")) {
+                else if (parameters[0].equals("cd..")) {
                         local.goBackwards();
                         System.out.println("Currentpath: " + local.getStorage().getCurrentPath());
 

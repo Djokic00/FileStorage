@@ -515,7 +515,6 @@ public class LocalImplementation extends SpecificationClass {
             createUser(username, password, 1);
             connectedUser = new User(username,password,1);
             fileStorage.setCurrentPath(fileStorage.getStoragePath());
-
             return true;
         }
         else {
