@@ -2,12 +2,7 @@
 
 ## About The Project
 
-File storage is simply a folder that contains config.json (information about size and restrictions in that storage) and users.json which acts like database for storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive. 
-
-## Build process
-
-Program can be compiled and run from IDE or directly from command-line/terminal. To run it from command-line/terminal follow these steps:
-
+File storage is simply a folder that contains config.json (information about size and restrictions in that storage) and users.json which acts like database for storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive and to uncomment Class.forName("GoogleImplementation") in CommandLine. 
 
 ## Usage
 
@@ -34,6 +29,10 @@ Notation:
 - <b>logout</b> - disconnect the user (to connect again type path <path to storage>)
 - <b>sort (asc or desc) [date or size]</b> - sort files in current directory, if optional argument is empty it sort files alphabetically
 - <b>ls [filter]</b> - list files in current directory ( filter can be .txt or .jpeg or anything after dot (.) )
+- <b>upload (fileName)</b> - uploads selected file from local system to a storage where user is logged-in
+- <b>copy (fileName) (path) [files]</b> - copies one or more files to the new path
+- <b>download (fileName)</b> - downloads selected file to "users.home" path.
+- <b>move (fileName) (path) [files]</b> - moves one or more files to the given path 
 - <b>exit</b> - exits from application
 
  ## Config.json & Users.json
@@ -46,3 +45,7 @@ Notation:
 - [ ]  Fix privilege for creating directory and file in google drive
 
 ## Code Contributors
+ 
+<a href="https://github.com/Djokic00/FileStorage/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Djokic00/FileStorage" />
+</a>
