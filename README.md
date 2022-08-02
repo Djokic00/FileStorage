@@ -2,7 +2,17 @@
 
 ## About The Project
 
-File storage is simply a folder that contains config.json (information about size and restrictions in that storage) and users.json which acts like database for storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive and to uncomment Class.forName("GoogleImplementation") in CommandLine. 
+[Project specification]()
+
+The project contains 4 separate applications: Specification, LocalImplementation, GoogleImplementation and CommandLine.
+
+- Specification represents an API for working with files
+- LocalImplementation is implementation of API for working with files on local machine
+- GoogleImplementation is implementation of API for working with files on Google Drive
+- CommandLine application is used to test different libraries (Local and Google)
+
+File storage is a folder that contains config.json which contains information about size of the storage and restrictions in the storage and users.json which acts like database for the storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive and to uncomment Class.forName("GoogleImplementation") in CommandLine. 
+
 
 ## Usage
 
