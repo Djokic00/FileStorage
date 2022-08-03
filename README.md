@@ -2,23 +2,23 @@
 
 ## About The Project
 
-[Project specification]()
+[Project specification](https://github.com/Djokic00/FileStorage/blob/master/prvi_projekat.pdf)
 
 The project contains 4 separate applications: Specification, LocalImplementation, GoogleImplementation and CommandLine.
 
 - Specification represents an API for working with files
 - LocalImplementation is implementation of API for working with files on local machine
-- GoogleImplementation is implementation of API for working with files on Google Drive
+- GoogleImplementation is implementation of API for working with files on google drive
 - CommandLine application is used to test different libraries (Local and Google)
 
-File storage is a folder that contains config.json which contains information about size of the storage and restrictions in the storage and users.json which acts like database for the storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use Google drive you have to change token for accessing drive and to uncomment Class.forName("GoogleImplementation") in CommandLine. 
+File storage is a folder which contains two files - config.json and user.json. Former file contains information about size of the storage and restrictions in the storage and latter acts like database for the storage. Program is implemented to work with local machine or Google drive depending on how it was packaged (built). Additionally, to use google drive you have to change token for accessing drive and to uncomment Class.forName("GoogleImplementation") in CommandLine. 
 
 
 ## Usage
 
 Program is used through command line interface. First step is to create a storage using ns command and absolute path which will be the location of the storage. After that, storage size, restriction, username and password, for the root user, will be required. Once the storage is created, all of the down commands are available for use.
 
-Notation: 
+<b>Notation:</b>
 
 - parentheses (required)
 - square brackets [optional]
