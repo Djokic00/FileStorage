@@ -45,9 +45,9 @@ Program is used through command line interface. First step is to create a storag
 - <b>move (fileName) (path) [files]</b> - moves one or more files to the given path 
 - <b>exit</b> - exits from application
 
- ## Config.json & Users.json
-  ![config.json](Pictures/config.png)
-  ![users.json](Pictures/users.png)
+ | Config | Users |
+ | ----- | ------ |
+| ![config.json](Pictures/config.png) | ![users.json](Pictures/users.png)|
 
 ## TODO:
 
