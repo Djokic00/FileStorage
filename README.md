@@ -1,5 +1,6 @@
 # FileStorage
 
+## About The Project
 [Project specification](https://github.com/Djokic00/FileStorage/blob/master/prvi_projekat.pdf) - Project Specification is written in Serbian language.
 
 The project contains 4 separate applications: Specification, LocalImplementation, GoogleImplementation and CommandLine.
@@ -42,10 +43,15 @@ Program is used through command line interface. First step is to create a storag
 - <b>download (fileName)</b> - downloads selected file to "users.home" path.
 - <b>move (fileName) (path) [files]</b> - moves one or more files to the given path 
 - <b>exit</b> - exits from application
-
  | Config | Users |
  | ----- | ------ |
 | ![config.json](Pictures/config.png) | ![users.json](Pictures/users.png)|
+
+## Technology stack
+
+Technologies used in the project:
+- Java 17
+- Maven
 
 ## Code Contributors
  
