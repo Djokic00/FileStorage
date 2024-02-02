@@ -1,8 +1,6 @@
 # FileStorage
 
-## About The Project
-
-[Project specification](https://github.com/Djokic00/FileStorage/blob/master/prvi_projekat.pdf)
+[Project specification](https://github.com/Djokic00/FileStorage/blob/master/prvi_projekat.pdf) - Project Specification is written in Serbian language.
 
 The project contains 4 separate applications: Specification, LocalImplementation, GoogleImplementation and CommandLine.
 
@@ -48,11 +46,6 @@ Program is used through command line interface. First step is to create a storag
  | Config | Users |
  | ----- | ------ |
 | ![config.json](Pictures/config.png) | ![users.json](Pictures/users.png)|
-
-## TODO:
-
-- [ ]  Fix move method in google drive (to go up in hierarchy)
-- [ ]  Fix privilege for creating directory and file in google drive
 
 ## Code Contributors
  
